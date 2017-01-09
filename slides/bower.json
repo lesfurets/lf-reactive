@@ -1,0 +1,22 @@
+{
+  "name": "lesfurets-reactive-slides",
+  "version": "1.0.0",
+  "authors": [
+    "ozangunalp <ozangunalp@gmail.com>"
+  ],
+  "description": "Slides pour la présentation",
+  "main": "index.html",
+  "license": "MIT",
+  "homepage": "https://www.lesfurets.com",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "reveal.js": "~3.3.0"
+  }
+}

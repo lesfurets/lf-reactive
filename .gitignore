@@ -18,7 +18,5 @@ eclipse-cp.sh
 generated/
 .DS_Store
 
-
 *.swp
-
 **/node_modules/*
