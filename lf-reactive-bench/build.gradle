@@ -1,0 +1,22 @@
+plugins {
+    id "me.champeau.gradle.jmh" version "0.3.1"
+}
+
+apply plugin: "me.champeau.gradle.jmh"
+
+description = 'lesfurets-reactive-benchmarks'
+dependencies {
+    compile project(':lf-reactive')
+    compile group: 'com.google.guava', name: 'guava', version: '20.0'
+    compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.0.0'
+    compile group: 'io.vertx', name: 'vertx-core', version: '3.3.3'
+
+    jmh 'org.openjdk.jmh:jmh-core:1.17.3'
+    jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.17.3'
+}
+
+jmh {
+    jmhVersion = '1.17.3'
+    includeTests = true
+    duplicateClassesStrategy = 'warn'
+}

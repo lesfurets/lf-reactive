@@ -1,0 +1,37 @@
+subprojects {
+    apply plugin: "java"
+
+    group = "com.lesfurets.reactive"
+    version = "1.0.0"
+
+    sourceCompatibility = JavaVersion.VERSION_1_9
+    targetCompatibility = JavaVersion.VERSION_1_9
+
+    tasks.withType(JavaCompile) {
+        configure(options) {
+            compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+            encoding = "UTF-8"
+        }
+    }
+
+    tasks.withType(Javadoc) {
+        configure(options) {
+            encoding "UTF-8"
+            docEncoding "UTF-8"
+            charSet "UTF-8"
+            linkSource true
+            noTimestamp true
+        }
+    }
+
+    tasks.withType(Test) {
+      testLogging {
+        exceptionFormat "full"
+        events "failed", "started", "standard_out", "standard_error"
+      }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+}
