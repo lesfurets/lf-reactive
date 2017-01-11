@@ -416,14 +416,15 @@
 
 .reveal table th,
 .reveal table td {
-    text-align: left;
-    padding: 0.2em 0.5em 0.2em 0.5em;
+    text-align: center;
+    vertical-align: middle;
+    padding: 0.2em 0.5em 0.5em 0.5em;
     border: 0px solid;
 }
 
 .reveal table td,
 .reveal table thead {
-    border-bottom: 1px solid;
+    border-bottom: 2px solid;
 }
 
 .reveal .strong {

@@ -91,7 +91,7 @@
 
     <section class="center" data-background="#333">
       <h2>Service orchestrator</h2>
-      <img style="width: 75%;background-color: white" src="../img/reactive/scattergather.gif">
+      <img style="width: 75%;background-color: white" src="../img/scatter_gather.jpg">
     </section>
 
     <!-- Eight Fallacies of distributed computing -->
@@ -126,21 +126,6 @@
     </section>
 
     <section class="center" data-background="#333">
-      <h2>How do we scale?</h2>
-      <div class="code-wrapper">
-      <pre>
-          <code class="code java" data-trim data-noescape>
-        if (executor.getActiveCount() >= POOL_SIZE) {
-            throw new NoExecutorAvailable("ThreadPool buzy");
-        }
-          </code>
-      </pre>
-      </div>
-      <div>
-      </div>
-    </section>
-
-    <section class="center" data-background="#333">
       <h2>Clean-er code ?</h2>
       <div class="code-wrapper smaller">
       <pre>
@@ -170,6 +155,19 @@
         }
         return Collections.unmodifiableMap(contexts);
     }
+          </code>
+      </pre>
+      </div>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>How do we scale?</h2>
+      <div class="code-wrapper">
+      <pre>
+          <code class="code java" data-trim data-noescape>
+        if (executor.getActiveCount() >= POOL_SIZE) {
+            throw new NoExecutorAvailable("ThreadPool buzy");
+        }
           </code>
       </pre>
       </div>
@@ -228,15 +226,17 @@
       <div class="code-wrapper">
       <pre>
           <code class="code java" data-trim data-noescape>
-                ExecutorService executor = Executors.newCachedThreadPool();
+                Future&lt;String&gt; http = ExecutorService executor = Executors.newCachedThreadPool();
     executor.submit(() -> {
       try {
-        return this.httpBlockingGet("http://www.lesfurets.com");
+        return httpBlockingGet("http://www.lesfurets.com");
       } catch (Exception e) {
         e.printStackTrace();
         return "Error :"+e.getMessage();
       }
     });
+    // blocking get
+    String content = http.get();
           </code>
       </pre>
       </div>
@@ -245,6 +245,8 @@
     <section class="center" data-background="#333">
       <h2>Message Queues</h2>
       <img style="width: 75%;background-color: white" src="../img/reactive/jobqueue1.png">
+      <p class="strong">Handle changes on throughput with buffering</p>
+      <p class="strong color-deeporange300">What if workers can't keep up with events?</p>
     </section>
 
     <section class="center small" data-background="#333" data-markdown>
@@ -317,9 +319,25 @@
 
     <section class="center" data-background="#333">
       <h2>CompletableFuture</h2>
-      <ul class="white nodisc">
-        <li>Represents the result of an action that may, or may not, have occurred yet.</li>
-      </ul>
+        <!--<li>Represents the result of an action that may, or may not, have occurred yet.</li>-->
+      <div class="code-wrapper">
+      <pre>
+          <code class="code java" data-trim data-noescape>
+          CompletableFuture.supplyAsync(() -> {
+      try {
+        return httpBlockingGet("http://www.lesfurets.com");
+      } catch (Exception e) {
+        return "Error :"+e.getMessage();
+      }
+    }, executor)
+        .thenApply(c -> searchTitle(c))
+        .thenAccept(s -> {
+          // use title
+        });
+          </code>
+      </pre>
+      </div>
+      <p class="strong color-deeporange300">Error handling</p>
     </section>
 
     <section class="small" data-background="#333" data-markdown>
@@ -327,62 +345,79 @@
         <script type="text/template">
           ||ExecutorService |Message Queues|Event Loops|CompletableFuture|
           |--|--|--|--|--|
-          |Thread management|+|+|~|-|
+          |Thread management|+|+|~|+|
           |Shared state|-|-|~|+|
           |Composability|-|~|-|+|
-          |Error handling|-|-|~|+|
+          |Error handling|-|-|~|-|
           |Throughput management|-|~|-|-|
         </script>
       </div>
     </section>
 
+
+
     <section class="center" data-background="#333">
-      <h2>Streams</h2>
+      <h2>
+        <span class="color-indigo300">Reactive</span>
+        <span class="color-deeporange300">Streams</span>
+      </h2>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Streams != Collections</h2>
       <p>
         <span class="strong">Collection</span><br>
-          Define data: iterable group of items with definite size
+        <span class="color-indigo300">Definition of data</span>: Iterable group of items, definite size
       </p>
       <p>
         <span class="strong">Stream</span><br>
-        Define work: operations on a unbounded group of items
+        <span class="color-indigo300">Define work</span>: Operations on group of items, unbounded size
       </p>
     </section>
 
     <section class="center" data-background="#333">
       <h2>Streams Java 8</h2>
-      <div class="code-wrapper smaller">
+      <div class="code-wrapper">
       <pre>
           <code class="code java" data-trim data-noescape>
             List&lt;QuoteResult&gt; resultList = LongStream.range(0, 11)
             .boxed()
             .map(l -> new QuoteRequest(l))
+            .filter(l -> !fromRobot(l))
             .map(q -> q.toAnonymousRequest())
             .peek(System.out::println)
             .collect(Collectors.toList());
           </code>
       </pre>
       </div>
-      <p>Functional programming => <br>
+      <p class="strong">Functional programming => <br>
           immutability =><br>
-          no more shared state
+        <span class="color-indigo300">no more shared state</span>
       </p>
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Streams</h2>
-      <div class="code-wrapper smaller">
-        <ul class="white nodisc">
-          <li>Définit les opérations sur un group d'evénements</li>
-          <li>Publisher Subscriber</li>
-          <li>Pull demand, Push data</li>
-        </ul>
-      </div>
+      <h2>Reactive Streams</h2>
+      <p>
+        <span class="strong color-deeporange300">asynchronous</span> events<br>
+        <span class="strong color-indigo300">+</span><br>
+        <span class="strong color-deeporange300">declarative</span> functions<br>
+        <span class="strong color-indigo300">+</span><br>
+        non-blocking <span class="strong color-deeporange300">back pressure</span>
+      </p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Back pressure ?</h2>
+      <p class="strong">Remember message queues?</p>
+      <img style="width: 50%;background-color: white" src="../img/reactive/reactive-streams.001.png">
+      <p></p>
     </section>
 
     <section class="center" data-background="#333">
       <h2>Reactive Streams</h2>
-      <img style="width: 75%;background-color: white" src="../img/reactive/pub_sub_reactive.png">
-      <p>Pull demand, Push data</p>
+      <img style="width: 85%;background-color: white" src="../img/reactive/reactive-streams.002.png">
+      <p class="strong">Pull demand, Push data</p>
     </section>
 
     <section class="center" data-background="#333">
@@ -408,6 +443,18 @@
           </code>
       </pre>
       </div>
+      <p class="strong">Included in Java 9<br>
+        <code>j.u.c.Flow</code>
+      </p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Reactive Streams</h2>
+      <p>RxJava2</p>
+      <p>Spring Reactor</p>
+      <p>Vert.x</p>
+      <p>Akka Streams</p>
+      <p>...</p>
     </section>
 
     <section class="center" data-background="#333">
@@ -417,15 +464,20 @@
         <span class="strong color-indigo300">+</span><br>
         [<span class="strong color-deeporange300">declarative</span> flow of data transformations]
       </p>
-      <p>
+      <p class="strong">
         Observables + Operators + Scheduling
       </p>
-      <p>Separation of concerns</p>
     </section>
 
     <section class="center" data-background="#333">
       <h2>RxJava</h2>
-      <p>React to </p>
+      <div class="code-wrapper">
+      <pre>
+          <code class="code java" data-trim data-noescape>
+            Observable.just(1, 2, 3, 4)
+          </code>
+      </pre>
+      </div>
     </section>
 
     <section class="small" data-background="#333" data-markdown>
@@ -433,10 +485,10 @@
         <script type="text/template">
           ||ExecutorService |Message Queues|Event Loops|CompletableFuture|RxJava2|
           |--|--|--|--|--|
-          |Thread management|+|+|~|-|+|
-          |Shared state|-|-|~|+|++|
-          |Composability|-|~|-|+|++|
-          |Error handling|-|-|~|+|+|
+          |Thread management|+|+|~|+|+|
+          |Shared state|-|-|~|+|+|
+          |Composability|-|~|-|+|+|
+          |Error handling|-|-|~|-|+|
           |Throughput management|-|~|-|-|+|
         </script>
       </div>
