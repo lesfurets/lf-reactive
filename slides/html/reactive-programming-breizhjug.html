@@ -67,41 +67,31 @@
 
     <section class="center" data-background="#333">
       <h2>LesFurets.com</h2>
-      <ul class="white nodisc">
-        <li>Insurance comparison</li>
-        <li>We call web-services of more than 25 insurers to have the best prices.</li>
-        <li>Image : PPS chez LesFurets.com</li>
-      </ul>
+      <img style="width: 75%;background-color: white" src="../img/PPS_LesFurets_com.png">
+      <!--<ul class="white nodisc">-->
+        <!--<li>Insurance comparison</li>-->
+        <!--<li>We call web-services of more than 25 insurers to have the best prices.</li>-->
+      <!--</ul>-->
     </section>
 
     <section class="center" data-background="#333">
       <h2>LesFurets.com</h2>
       <ul class="white nodisc">
-        <li>Tomcat Blocking IO</li>
+        <li>Apache Tomcat Blocking IO</li>
         <li>GWT RPC on Servlet</li>
       </ul>
-      <p>We are far from being reactive.</p>
+      <p class="strong">We are far from being reactive.</p>
     </section>
 
     <section class="center" data-background="#333">
       <h2>Reactive Hype</h2>
       <img style="width: 75%;background-color: white" src="../img/reactive/hype_cycle.png">
-      <p>Let's test this!</p>
+      <p class="strong">Let's test this!</p>
     </section>
 
     <section class="center" data-background="#333">
       <h2>Service orchestrator</h2>
       <img style="width: 75%;background-color: white" src="../img/reactive/scattergather.gif">
-    </section>
-
-    <section class="center" data-background="#333">
-      <h2>Service calls fail, a lot.</h2>
-      <img style="width: 75%;background-color: white" src="../img/reactive/tessera.png">
-    </section>
-
-    <section class="center" data-background="#333">
-      <h2>Being reactive, on Slack</h2>
-      <img style="width: 75%;background-color: white" src="../img/reactive/Slack_-_LesFurets.png">
     </section>
 
     <!-- Eight Fallacies of distributed computing -->
@@ -114,7 +104,7 @@
     <!--<li>7.	Transport cost is zero</li>-->
     <!--<li>8.	The network is homogeneous</li>-->
     <section class="center" data-background="#333">
-      <h2>Some fallacies</h2>
+      <h2>Distributed Computing Fallacies</h2>
       <div class="flushleft">
         <ul class="white nodisc">
             <li>The network is <strong>NOT</strong> reliable</li>
@@ -123,6 +113,16 @@
             <li>There is <strong>NOT</strong> one administrator</li>
         </ul>
       </div>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Service calls fail, a lot.</h2>
+      <img style="width: 75%;background-color: white" src="../img/reactive/tessera.png">
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Being reactive, on Slack</h2>
+      <img style="width: 75%;background-color: white" src="../img/reactive/Slack_-_LesFurets.png">
     </section>
 
     <section class="center" data-background="#333">
@@ -178,22 +178,42 @@
     <section class="center" data-background="#333">
       <h2>Underlying problems</h2>
       <ul class="white nodisc">
-        <li>Scalability : + resources ?=> + performance</li>
-        <li>Maintainability : Clean code</li>
-        <li>Resilience : SLA management</li>
+        <li><span class="strong color-indigo300">Scalability</span> : + resources ?=> + performance</li>
+        <li><span class="strong color-indigo300">Resilience</span> : SLA management</li>
+        <li><span class="strong color-indigo300">Maintainability</span> : Clean code</li>
       </ul>
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Asynchronous code</h2>
+      <h2>Asynchronous execution</h2>
       <ul class="nodisc">
-        <li>Scalability & Performance : distribute tasks to multiple resources</li>
-        <li>Resilience : isolation of errors</li>
+        <li><span class="strong color-deeporange300">Scalability & Performance</span> : distribute tasks to multiple resources</li>
+        <li><span class="strong color-deeporange300">Resilience</span> : isolation of errors</li>
       </ul>
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Asynchronous code</h2>
+      <h2>Mastering concurrency is difficult.</h2>
+      <ul class="nodisc">
+        <li>Thread pool management</li>
+        <li>Access to shared state (deadlocks, race conditions)</li>
+        <li>Error handling (i.e. timeouts)</li>
+        <li>Composing / coordinating async tasks</li>
+        <li>Throughput management</li>
+        <li>...</li>
+      </ul>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Asynchronous abstractions</h2>
+      <ul class="white nodisc">
+        <li>ExecutorService and locks</li>
+        <li>Message queues with buffering</li>
+      </ul>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Synchronous API</h2>
       <div class="code-wrapper">
       <pre>
           <code class="code java" data-trim data-noescape>
@@ -201,107 +221,225 @@
           </code>
       </pre>
       </div>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>ExecutorService</h2>
       <div class="code-wrapper">
       <pre>
           <code class="code java" data-trim data-noescape>
-            public void httpAsyncGet(String url, AsyncCallback&lt;String&gt;);
-          </code>
-      </pre>
-      </div>
-      <div class="code-wrapper">
-      <pre>
-          <code class="code java" data-trim data-noescape>
-            public AsyncResult&lt;String&gt; httpAsyncGet(String url);
+                ExecutorService executor = Executors.newCachedThreadPool();
+    executor.submit(() -> {
+      try {
+        return this.httpBlockingGet("http://www.lesfurets.com");
+      } catch (Exception e) {
+        e.printStackTrace();
+        return "Error :"+e.getMessage();
+      }
+    });
           </code>
       </pre>
       </div>
     </section>
 
-
     <section class="center" data-background="#333">
-      <h2>Mastering concurrency is difficult.</h2>
-      <ul class="nodisc">
-        <li>Thread pool management</li>
-        <li>Access to shared state</li>
-        <li>Error handling</li>
-        <li>Difficult to compose/coordinate async tasks</li>
-        <li>Throughput management</li>
-        <li>...</li>
-      </ul>
-    </section>
-
-    <section class="center" data-background="#333">
-      <h2>Classic solutions for asynchronous execution</h2>
-      <ul class="white nodisc">
-        <li>Managing threads and locks for blocking calls</li>
-        <li>Message/task queues with buffering</li>
-        <li>Event loops with callbacks</li>
-      </ul>
+      <h2>Message Queues</h2>
+      <img style="width: 75%;background-color: white" src="../img/reactive/jobqueue1.png">
     </section>
 
     <section class="center small" data-background="#333" data-markdown>
-      <script type="text/template">
-        ## Asynchronous aspects ##
-        ||h1|h2|
-        |--|--|--|
-        |Thread management|a|b|
-        |Shared state|a|b|
-        |Composability|a|b|
-        |Error handling|a|b|
-        |Throughput management|a|b|
-      </script>
+      <div style="align-content: center;">
+        <script type="text/template">
+          ||ExecutorService |Message Queues|
+          |--|--|--|--|--|
+          |Thread management|+|+|
+          |Shared state|-|-|
+          |Composability|-|~|
+          |Error handling|-|-|
+          |Throughput management|-|~|
+        </script>
+      </div>
     </section>
 
     <section class="center" data-background="#333">
       <h2>Reactive Programming</h2>
-        <p>React to asyncronous data / events<br>
-        Declarative flow of data transformations
-        </p>
-      <p>!= Reactive systms<br>
-        architectural design pattenr for distributed systems
+      <p>React to <span class="strong color-deeporange300">asyncronous</span>
+        data / events<br>
+        <span class="strong color-indigo300">+</span><br>
+        [<span class="strong color-deeporange300">declarative</span> flow of data transformations]
+      </p>
+      <p><span class="strong color-deeporange300">!=</span><br>
+        <span class="strong">Reactive Systems</span><br>
+        Architectural design pattern for distributed systems
       </p>
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Reactive programming abstractions</h2>
+      <h2>Reactive abstractions</h2>
       <ul class="white nodisc">
+        <li>Event loops with callbacks</li>
         <li>Promise/Future/CompletableFuture</li>
         <li>Reactive Streams</li>
       </ul>
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Futures</h2>
+      <h2>Event Loops</h2>
+      <img style="width: 75%;background-color: white" src="../img/reactive/ev-server.svg">
+      <p class="strong">Mono thread + NIO</p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Asynchronous Callback</h2>
+      <div class="code-wrapper">
+      <pre>
+          <code class="code java" data-trim data-noescape>
+            public void httpAsyncGet(String url, AsyncCallback&lt;AsyncResult&gt;);
+          </code>
+      </pre>
+      </div>      <div class="code-wrapper">
+      <pre>
+          <code class="code java" data-trim data-noescape>
+            httpAsyncGet("http://www.lesfurets.com", ar -> {
+              if (ar.isSuccess()) {
+                String content = ar.result();
+                // do something
+              } else {
+                Throwable e = ar.error();
+                // handle error
+              }
+            });
+          </code>
+      </pre>
+      </div>
+      <p class="strong color-deeporange300">Death by callback</p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>CompletableFuture</h2>
       <ul class="white nodisc">
-        <li>CompletableFuture</li>
         <li>Represents the result of an action that may, or may not, have occurred yet.</li>
-        <li></li>
       </ul>
+    </section>
+
+    <section class="small" data-background="#333" data-markdown>
+      <div class="flushleft">
+        <script type="text/template">
+          ||ExecutorService |Message Queues|Event Loops|CompletableFuture|
+          |--|--|--|--|--|
+          |Thread management|+|+|~|-|
+          |Shared state|-|-|~|+|
+          |Composability|-|~|-|+|
+          |Error handling|-|-|~|+|
+          |Throughput management|-|~|-|-|
+        </script>
+      </div>
     </section>
 
     <section class="center" data-background="#333">
       <h2>Streams</h2>
-      <ul class="white nodisc">
-        <li>Collection : iterable group of items with definite size = define data</li>
-        <li>Stream = operations on a unbounded group of items = define work</li>
-      </ul>
-      <p>TODO : code sample, immutability</p>
+      <p>
+        <span class="strong">Collection</span><br>
+          Define data: iterable group of items with definite size
+      </p>
+      <p>
+        <span class="strong">Stream</span><br>
+        Define work: operations on a unbounded group of items
+      </p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Streams Java 8</h2>
+      <div class="code-wrapper smaller">
+      <pre>
+          <code class="code java" data-trim data-noescape>
+            List&lt;QuoteResult&gt; resultList = LongStream.range(0, 11)
+            .boxed()
+            .map(l -> new QuoteRequest(l))
+            .map(q -> q.toAnonymousRequest())
+            .peek(System.out::println)
+            .collect(Collectors.toList());
+          </code>
+      </pre>
+      </div>
+      <p>Functional programming => <br>
+          immutability =><br>
+          no more shared state
+      </p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Streams</h2>
+      <div class="code-wrapper smaller">
+        <ul class="white nodisc">
+          <li>Définit les opérations sur un group d'evénements</li>
+          <li>Publisher Subscriber</li>
+          <li>Pull demand, Push data</li>
+        </ul>
+      </div>
     </section>
 
     <section class="center" data-background="#333">
       <h2>Reactive Streams</h2>
-      <ul class="white nodisc">
-        Définit les opérations sur un group d'evénements
-        Publisher Subscriber
-      </ul>
+      <img style="width: 75%;background-color: white" src="../img/reactive/pub_sub_reactive.png">
+      <p>Pull demand, Push data</p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Reactive Streams</h2>
+      <div class="code-wrapper smaller">
+      <pre>
+          <code class="code java" data-trim data-noescape>
+  public interface Publisher&lt;T&gt; {
+    void subscribe(Subscriber&lt;? super &lt;T&gt; subscriber);
+  }
+
+  public interface Subscriber&lt;T&gt; {
+    void onSubscribe(Subscription subscription);
+    void onNext(T item);
+    void onError(Throwable throwable);
+    void onComplete();
+  }
+
+  public interface Subscription {
+    void request(long n);
+    void cancel();
+  }
+          </code>
+      </pre>
+      </div>
     </section>
 
     <section class="center" data-background="#333">
       <h2>RxJava</h2>
-      <ul class="white nodisc">
+      <p>React to <span class="strong color-deeporange300">asyncronous</span>
+        data / events<br>
+        <span class="strong color-indigo300">+</span><br>
+        [<span class="strong color-deeporange300">declarative</span> flow of data transformations]
+      </p>
+      <p>
         Observables + Operators + Scheduling
-      </ul>
+      </p>
       <p>Separation of concerns</p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>RxJava</h2>
+      <p>React to </p>
+    </section>
+
+    <section class="small" data-background="#333" data-markdown>
+      <div class="flushleft">
+        <script type="text/template">
+          ||ExecutorService |Message Queues|Event Loops|CompletableFuture|RxJava2|
+          |--|--|--|--|--|
+          |Thread management|+|+|~|-|+|
+          |Shared state|-|-|~|+|++|
+          |Composability|-|~|-|+|++|
+          |Error handling|-|-|~|+|+|
+          |Throughput management|-|~|-|-|+|
+        </script>
+      </div>
     </section>
 
     <section class="center" data-background="#333">

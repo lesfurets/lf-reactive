@@ -420,3 +420,12 @@
     padding: 0.2em 0.5em 0.2em 0.5em;
     border: 0px solid;
 }
+
+.reveal table td,
+.reveal table thead {
+    border-bottom: 1px solid;
+}
+
+.reveal .strong {
+    font-weight: bold;
+}
