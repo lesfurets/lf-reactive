@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Programmation réactive pour l'orchestration de services au sein de la JVM</title>
-  <meta name="description" content="Continuous delivery chez LesFurets.com">
+  <title>Reactive programming for service orchestration on JVM</title>
+  <meta name="description" content="Reactive programming for service orchestration on JVM">
   <meta name="author" content="Ozan Gunalp">
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -42,8 +42,8 @@
     <!-- SECTION - INTRO -->
 
     <section class="flushright" data-state="background-furets">
-      <h1>Programmation réactive</h1>
-      <h2>Orchestration de services <br> au sein de la JVM</h2>
+      <h1>Reactive programming</h1>
+      <h2>for service orchestration<br>on JVM</h2>
       <h3>Ozan Gunalp</h3>
     </section>
 
@@ -57,9 +57,9 @@
           <a style="color:white" href="https://github.com/ozangunalp">github.com/ozangunalp</a>
         </li>
       </ul>
-      <h3 style="color:#f07d00">Contributeurs</h3>
+      <h3 style="color:#f07d00">Contributors</h3>
       <ul class="flushleft small nodisc">
-        <li>Gilles </li>
+        <li>Gilles Di Guglielmo</li>
       </ul>
     </section>
 
@@ -68,39 +68,66 @@
     <section class="center" data-background="#333">
       <h2>LesFurets.com</h2>
       <ul class="white nodisc">
-        <li>Comparateur d'assurances</li>
-        <li>Nous solicitons les web-services pour avoir les meilleurs prix</li>
+        <li>Insurance comparison</li>
+        <li>We call web-services of more than 25 insurers to have the best prices.</li>
         <li>Image : PPS chez LesFurets.com</li>
       </ul>
     </section>
 
     <section class="center" data-background="#333">
-      <h2>L'orchestrator de service</h2>
-      <img style="width: 100%;" src="../img/reactive/scattergather.gif">
+      <h2>LesFurets.com</h2>
       <ul class="white nodisc">
-        <!--<li>Image : Scatter - Gather pattern</li>-->
-        <li>20-40 pps par minute (confidentiel ?)</li>
+        <li>Tomcat Blocking IO</li>
+        <li>GWT RPC on Servlet</li>
       </ul>
+      <p>We are far from being reactive.</p>
     </section>
 
-      <section class="center" data-background="#333">
-        <h2>Problème</h2>
-        <h3>Illusions de l'informatique distribuée</h3>
-        <ul class="white nodisc">
-          <li>1.	The network is reliable</li>
-          <li>2.	Latency is zero</li>
-          <li>3.	Bandwidth is infinite</li>
-          <li>4.	The network is secure</li>
-          <li>5.	Topology doesn't change</li>
-          <li>6.	There is one administrator</li>
-          <li>7.	Transport cost is zero</li>
-          <li>8.	The network is homogeneous</li>
-        </ul>
-      </section>
+    <section class="center" data-background="#333">
+      <h2>Reactive Hype</h2>
+      <img style="width: 75%;background-color: white" src="../img/reactive/hype_cycle.png">
+      <p>Let's test this!</p>
+    </section>
 
-      <section class="center" data-background="#333">
-      <h2>Problème</h2>
-        <div class="code-wrapper">
+    <section class="center" data-background="#333">
+      <h2>Service orchestrator</h2>
+      <img style="width: 75%;background-color: white" src="../img/reactive/scattergather.gif">
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Service calls fail, a lot.</h2>
+      <img style="width: 75%;background-color: white" src="../img/reactive/tessera.png">
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Being reactive, on Slack</h2>
+      <img style="width: 75%;background-color: white" src="../img/reactive/Slack_-_LesFurets.png">
+    </section>
+
+    <!-- Eight Fallacies of distributed computing -->
+    <!--<li>1.	The network is reliable</li>-->
+    <!--<li>2.	Latency is zero</li>-->
+    <!--<li>3.	Bandwidth is infinite</li>-->
+    <!--<li>4.	The network is secure</li>-->
+    <!--<li>5.	Topology doesn't change</li>-->
+    <!--<li>6.	There is one administrator</li>-->
+    <!--<li>7.	Transport cost is zero</li>-->
+    <!--<li>8.	The network is homogeneous</li>-->
+    <section class="center" data-background="#333">
+      <h2>Some fallacies</h2>
+      <div class="flushleft">
+        <ul class="white nodisc">
+            <li>The network is <strong>NOT</strong> reliable</li>
+            <li>Latency is <strong>NOT</strong> zero</li>
+            <li>...</li>
+            <li>There is <strong>NOT</strong> one administrator</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>How do we scale?</h2>
+      <div class="code-wrapper">
       <pre>
           <code class="code java" data-trim data-noescape>
         if (executor.getActiveCount() >= POOL_SIZE) {
@@ -108,74 +135,155 @@
         }
           </code>
       </pre>
-        </div>
+      </div>
+      <div>
+      </div>
     </section>
 
+    <section class="center" data-background="#333">
+      <h2>Clean-er code ?</h2>
+      <div class="code-wrapper smaller">
+      <pre>
+          <code class="code java" data-trim data-noescape>
+    private Map doQuotation(ResultatTarifications resultat, Control control, List products) {
+        //...
+        final List runnables = new ArrayList<>();
+        try {
+            prepareRunnables(runnables, projet, resultat, products, control, ...);
+            long timeOut = control.getConnectionTimeout();
+            final long startTime = System.currentTimeMillis();
+            for (OrchestratorRunnable runnable : runnables) {
+                // .. mapping in, web service call, mapping out
+                executeRunnable(timeOut, startTime, runnable);
+            }
+            waitAll(startTime, getModule(), runnables, timeOut);
+            logTarificationTimer(runnables, startTime);
+            postTraitements(resultat);
+        } catch (Throwable t) {
+            LOG.error("Error occurs during tarifications " + projet.getOffreUid(), t);
+        } finally {
+            checkResultat(resultat);
+        }
+        final Map contexts = new HashMap<>();
+        for (TarificationRunnable runnable : runnables) {
+            contexts.put(runnable.getProvider(), runnable.getContext());
+        }
+        return Collections.unmodifiableMap(contexts);
+    }
+          </code>
+      </pre>
+      </div>
+    </section>
 
     <section class="center" data-background="#333">
-      <h2>Problèmes soujacents</h2>
+      <h2>Underlying problems</h2>
       <ul class="white nodisc">
-        <li>Passage à l'echelle: + de ressources =? + de perf</li>
-        <li>Maintenabilité : Clairté de code</li>
-        <li>Gestion de SLA / résilience</li>
+        <li>Scalability : + resources ?=> + performance</li>
+        <li>Maintainability : Clean code</li>
+        <li>Resilience : SLA management</li>
       </ul>
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Traitement asynchrone</h2>
-      <ul class="white nodisc">
-        <li>Scalability & Performance : répartir les tâches sur plusieurs ressources</li>
-        <li>Résilience : isolation des erreurs</li>
+      <h2>Asynchronous code</h2>
+      <ul class="nodisc">
+        <li>Scalability & Performance : distribute tasks to multiple resources</li>
+        <li>Resilience : isolation of errors</li>
       </ul>
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Solutions classiques pour traitement asynchrone</h2>
-      <ul class="white nodisc">
-        <li>Gestion des threads & locks, appels bloquantes</li>
-        <li>Queues de message/tâches avec buffering</li>
-        <li>Event loops avec callbacks</li>
-        <!--<li>Acteurs avec message passing</li>-->
+      <h2>Asynchronous code</h2>
+      <div class="code-wrapper">
+      <pre>
+          <code class="code java" data-trim data-noescape>
+            public String httpBlockingGet(String url);
+          </code>
+      </pre>
+      </div>
+      <div class="code-wrapper">
+      <pre>
+          <code class="code java" data-trim data-noescape>
+            public void httpAsyncGet(String url, AsyncCallback&lt;String&gt;);
+          </code>
+      </pre>
+      </div>
+      <div class="code-wrapper">
+      <pre>
+          <code class="code java" data-trim data-noescape>
+            public AsyncResult&lt;String&gt; httpAsyncGet(String url);
+          </code>
+      </pre>
+      </div>
+    </section>
+
+
+    <section class="center" data-background="#333">
+      <h2>Mastering concurrency is difficult.</h2>
+      <ul class="nodisc">
+        <li>Thread pool management</li>
+        <li>Access to shared state</li>
+        <li>Error handling</li>
+        <li>Difficult to compose/coordinate async tasks</li>
+        <li>Throughput management</li>
+        <li>...</li>
       </ul>
-      <p>TODO : problèmes avec les abstractions classiques : accès aux ressources partagées / gestion des threads bloquante / callback hell / thread starvation</p>
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Systèmes réactives</h2>
+      <h2>Classic solutions for asynchronous execution</h2>
       <ul class="white nodisc">
-        <li>Responsive - they respond in an acceptable time</li>
-        <li>Elastic - they scale up and down</li>
-        <li>Resilient - they are designed to handle failures gracefully</li>
-        <li>Asynchronous - they interact using async messages</li>
+        <li>Managing threads and locks for blocking calls</li>
+        <li>Message/task queues with buffering</li>
+        <li>Event loops with callbacks</li>
       </ul>
-      <p>!= Reactive programming</p>
+    </section>
+
+    <section class="center small" data-background="#333" data-markdown>
+      <script type="text/template">
+        ## Asynchronous aspects ##
+        ||h1|h2|
+        |--|--|--|
+        |Thread management|a|b|
+        |Shared state|a|b|
+        |Composability|a|b|
+        |Error handling|a|b|
+        |Throughput management|a|b|
+      </script>
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Programmation réactive</h2>
-      <ul class="white nodisc">
-        <li>Evenements asynchrones</li>
-        <li>Flux de données déclarative</li>
-      </ul>
-      <p>TODO : emphasize difference between reactive systems</p>
+      <h2>Reactive Programming</h2>
+        <p>React to asyncronous data / events<br>
+        Declarative flow of data transformations
+        </p>
+      <p>!= Reactive systms<br>
+        architectural design pattenr for distributed systems
+      </p>
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Abstractions pour la programmation réactive</h2>
+      <h2>Reactive programming abstractions</h2>
       <ul class="white nodisc">
+        <li>Promise/Future/CompletableFuture</li>
         <li>Reactive Streams</li>
-        <li>Promes/Future/CompletableFuture</li>
-        <li>Actor model (?)</li>
-        <!--<li>Dataflow</li>-->
       </ul>
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Reactive Streams</h2>
-      <h3>Streams ? </h3>
+      <h2>Futures</h2>
       <ul class="white nodisc">
-        Collection : iterable group of items with definite size = define data
-        Stream = operations on a unbounded group of items = define work
+        <li>CompletableFuture</li>
+        <li>Represents the result of an action that may, or may not, have occurred yet.</li>
+        <li></li>
+      </ul>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Streams</h2>
+      <ul class="white nodisc">
+        <li>Collection : iterable group of items with definite size = define data</li>
+        <li>Stream = operations on a unbounded group of items = define work</li>
       </ul>
       <p>TODO : code sample, immutability</p>
     </section>
@@ -193,48 +301,157 @@
       <ul class="white nodisc">
         Observables + Operators + Scheduling
       </ul>
-      <p>Sépare les </p>
+      <p>Separation of concerns</p>
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Orchestrateur classique</h2>
-      <ul class="white nodisc">
-        <p>TODO : runnables, waitAll</p>
-      </ul>
+      <h2>Classic Orchestrator</h2>
+      <div class="code-wrapper smaller">
+      <pre>
+          <code class="code java" data-trim data-noescape>
+    private Map doQuotation(ResultatTarifications resultat, Control control, List<CodeFormule> codeFormules) {
+        //...
+        final List runnables = new ArrayList<>();
+        try {
+            prepareRunnables(runnables, projet, resultat, codeFormules, control, ...);
+            long timeOut = control.getConnectionTimeout();
+            final long startTime = System.currentTimeMillis();
+            for (OrchestratorRunnable runnable : runnables) {
+                executeRunnable(timeOut, startTime, runnable);
+            }
+            waitAll(startTime, getModule(), runnables, timeOut);
+            logTarificationTimer(runnables, startTime);
+            postTraitements(resultat);
+        } catch (Throwable t) {
+            LOG.error("Error occurs during tarifications " + projet.getOffreUid(), t);
+        } finally {
+            checkResultat(resultat);
+        }
+        final Map contexts = new HashMap<>();
+        for (TarificationRunnable runnable : runnables) {
+            contexts.put(runnable.getProvider(), runnable.getContext());
+        }
+        return Collections.unmodifiableMap(contexts);
+    }
+          </code>
+      </pre>
+      </div>
     </section>
 
     <section class="center" data-background="#333">
       <h2>Orchestrateur parallel stream</h2>
-      <ul class="white nodisc">
-      </ul>
-      <p>TODO : Gestion de ressources </p>
+
+      <div class="code-wrapper smaller">
+      <pre>
+          <code class="code java" data-trim data-noescape>
+      List&lt;QuoteResult&gt; resultList = LongStream.range(0, 11).parallel()
+      .boxed()
+      .map(l -> new QuoteRequest(l, 0.0))
+      .flatMap(q -> providers.stream().parallel().map(p -> p.doReceiveQuote(q)))
+      .collect(Collectors.toList());
+          </code>
+      </pre>
+      </div>
+      <p>TODO : Gestion de ressources</p>
+      <div class="code-wrapper smaller">
+      <pre>
+          <code class="code java" data-trim data-noescape>
+      System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "10");
+          </code>
+      </pre>
+      </div>
+
     </section>
 
     <section class="center" data-background="#333">
       <h2>Orchestrateur CompletableFuture</h2>
-      <ul class="white nodisc">
-        <li>completeOnTimeout</li>
-      </ul>
+      <div class="code-wrapper smaller">
+      <pre>
+          <code class="code java" data-trim data-noescape>
+                List&lt;CompletableFuture&lt;QuoteResult&gt;&gt; futures = LongStream.range(0, 11).sequential()
+            .boxed()
+            .map(l -> new QuoteRequest(l, 0.0))
+            .flatMap(q -> providers.stream()
+              .map(p -> new CompletableProvider(p, executorService))
+              .map(p -> p.doReceiveQuoteAsync(q)
+                          .completeOnTimeout(new QuoteResult(
+                            new TimeoutException("Timeout"), q.getOfferId(), p.provider.getId()),
+                              getTimeout(), TimeUnit.MILLISECONDS)
+              )
+            ).collect(Collectors.toList());
+
+            CompletableFuture&lt;List&lt;QuoteResult&gt;&gt; resultList =
+              CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenApply(v -> futures.stream()
+                                  .map(CompletableFuture::join)
+                                  .collect(toList()));
+
+            List&lt;QuoteResult&gt; rl = resultList.get();
+
+          </code>
+      </pre>
+      </div>
       <p>TODO : gestion des threads de timeout</p>
     </section>
 
     <section class="center" data-background="#333">
       <h2>Orchestrateur RxJava Observables</h2>
-      <ul class="white nodisc">
-        <li></li>
-      </ul>
+      <div class="code-wrapper smaller">
+      <pre>
+          <code class="code java" data-trim data-noescape>
+    List&lt;Observable&lt;QuoteResult&gt;&gt; resultList = LongStream.range(0, 11)
+        .boxed()
+        .map(l -> new QuoteRequest(l, 0.0))
+        .flatMap(q -> providers.stream()
+            .map(p -> Observable.defer(() -> Observable.just(p.doReceiveQuote(q)))
+                .subscribeOn(Schedulers.from(executorService))
+                .timeout(getTimeout(), TimeUnit.MILLISECONDS,
+                    Observable.just(new QuoteResult(
+                        new TimeoutException("Timeout"), q.getOfferId(), p.getId())))))
+        .collect(toList());
+
+    Single&lt;List&lt;QuoteResult&gt;&gt; merged = Observable.merge(resultList).toList();
+
+    List&lt;QuoteResult&gt; results = merged.blockingGet();
+
+          </code>
+      </pre>
+      </div>
     </section>
 
     <section class="center" data-background="#333">
       <h2>Orchestrateur RxJava2 Flowable</h2>
-      <ul class="white nodisc">
-      </ul>
+      <div class="code-wrapper smaller">
+      <pre>
+          <code class="code java" data-trim data-noescape>
+      List<QuoteResult> results = new ArrayList<>();
+    PublishProcessor<Long> processor = PublishProcessor.create();
+
+    Disposable subscribe = processor
+        .onBackpressureBuffer(10, () -> System.out.println(Thread.currentThread().getName() + ": Buffer Overflow "),
+            BackpressureOverflowStrategy.DROP_OLDEST)
+        .observeOn(Schedulers.from(executorService))
+        .map(l -> new QuoteRequest(l, 0.0))
+        .flatMap((q) -> Flowable.fromIterable(providers)
+            .flatMap(p -> Flowable.defer(() -> Flowable.just(p.doReceiveQuote(q)))
+                .subscribeOn(Schedulers.from(executorService))
+                .timeout(getTimeout(), TimeUnit.MILLISECONDS, Flowable.just(new QuoteResult(new
+                    TimeoutException("Timeout"), q.getOfferId(), p.getId())))
+            ).toList().toFlowable())
+        .subscribe(results::addAll);
+
+    Flowable.interval(getRequestFrequency(), TimeUnit.MILLISECONDS, Schedulers.io())
+        .takeWhile(t -> running.get())
+        .subscribe(processor);
+          </code>
+      </pre>
+      </div>
     </section>
 
     <section class="center" data-background="#333">
       <h2>Scheduling</h2>
       <ul class="white nodisc">
-        <li>Pool de threads séparés par backend ou global ? </li>
+        <li>Pool de threads séparés par backend ou global ?</li>
         <li>Buffering</li>
       </ul>
     </section>
@@ -273,6 +490,11 @@
         <li>Choisir la taille de buffer (compension de backpressure) par backend</li>
         <li>Implementer circuit breaker</li>
       </ul>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Reactive Book</h2>
+      <img style="width: 75%;background-color: white" src="../img/reactive/lrg.jpg">
     </section>
 
   </div>

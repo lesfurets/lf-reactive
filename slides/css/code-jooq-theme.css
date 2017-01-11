@@ -400,3 +400,23 @@
 .reveal mark .hljs-title {
     color: #000;
 }
+
+.reveal table {
+    align-content: center;
+    margin: auto;
+    border-collapse: collapse;
+    border-spacing: 0;
+    border: 0px;
+}
+
+.reveal table th {
+    font-weight: bold;
+    border-bottom: 0px;
+}
+
+.reveal table th,
+.reveal table td {
+    text-align: left;
+    padding: 0.2em 0.5em 0.2em 0.5em;
+    border: 0px solid;
+}
