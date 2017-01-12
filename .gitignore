@@ -20,3 +20,4 @@ generated/
 
 *.swp
 **/node_modules/*
+slides/img-src/Backup_*.cdr
