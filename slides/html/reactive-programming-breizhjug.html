@@ -180,9 +180,9 @@
       <div class="code-wrapper">
       <pre>
           <code class="code java" data-trim data-noescape>
-        if (executor.getActiveCount() >= POOL_SIZE) {
-            throw new NoExecutorAvailable("ThreadPool buzy");
-        }
+if (executor.getActiveCount() >= POOL_SIZE) {
+    throw new NoExecutorAvailable("ThreadPool buzy");
+}
           </code>
       </pre>
       </div>
@@ -196,7 +196,7 @@
     <section class="center" data-background="#333">
       <h2>Underlying problems</h2>
       <ul class="white nodisc">
-        <li><span class="strong color-indigo300">Scalability</span> : + resources ?=> + performance</li>
+        <li><span class="strong color-indigo300">Scalability</span> : + resources =>  + performance</li>
         <li><span class="strong color-indigo300">Resilience</span> : SLA management</li>
         <li><span class="strong color-indigo300">Maintainability</span> : Clean code</li>
       </ul>
@@ -609,22 +609,21 @@
       <div class="code-wrapper smaller">
       <pre>
           <code class="code java" data-trim data-noescape>
-    ForkJoinPool forkJoinPool = new ForkJoinPool(10);
+ForkJoinPool forkJoinPool = new ForkJoinPool(10);
 
-    forkJoinPool.submit(() ->
-        LongStream.range(0, 11).parallel()
-            .boxed()
-            .map(QuoteRequest::new)
-            .flatMap(q -> providers.stream().parallel()
-                    // map in
-                    .map(p -> p.doReceiveQuote(q))
-                    // map out
-            )
-            .collect(Collectors.toList())
-    );
+ForkJoinTask&lt;List&lt;QuoteResult&gt;&gt; submit = forkJoinPool.submit(() ->
+    LongStream.range(0, 11).parallel()
+        .boxed()
+        .map(QuoteRequest::new)
+        .flatMap(q -> providers.stream().parallel()
+                // map in
+                .map(p -> p.doReceiveQuote(q))
+                // map out
+        )
+        .collect(Collectors.toList())
+);
 
-    List&lt;QuoteResult&gt; results = submit.get();
-
+List&lt;QuoteResult&gt; results = submit.get();
           </code>
       </pre>
       </div>
@@ -657,14 +656,14 @@
       <div class="code-wrapper smaller">
       <pre>
           <code class="code java" data-trim data-noescape>
-  private CompletableFuture&lt;QuoteResult&gt; quoteFromProvider(QuoteRequest q, Provider p) {
-    return CompletableFuture.supplyAsync(() ->
-            provider.doReceiveQuote(q),
-        executorService)
-        .thenApply(p::mapResult)
-        .completeOnTimeout(new QuoteResult(new TimeoutException("Timeout")),
-            getTimeout(), TimeUnit.MILLISECONDS);
-  }
+private CompletableFuture&lt;QuoteResult&gt; quoteFromProvider(QuoteRequest q, Provider provider) {
+  return CompletableFuture.supplyAsync(() ->
+          provider.doReceiveQuote(q),
+      executorService)
+      .thenApply(provider::mapResult)
+      .completeOnTimeout(new QuoteResult(new TimeoutException("Timeout")),
+          getTimeout(), TimeUnit.MILLISECONDS);
+}
           </code>
       </pre>
       </div>
@@ -675,47 +674,25 @@
       <div class="code-wrapper smaller">
       <pre>
           <code class="code java" data-trim data-noescape>
-      List&lt;CompletableFuture&lt;QuoteResult&gt;&gt; futures = LongStream.range(0, 11).sequential()
-        .boxed()
-        .map(QuoteRequest::new)
-        .flatMap(q -> providers.stream()
-            .map(provider -> quoteFromProvider(q, provider))
-        )
-        .collect(Collectors.toList());
-
+List&lt;CompletableFuture&lt;QuoteResult&gt;&gt; futures = LongStream.range(0, 11).sequential()
+    .boxed()
+    .map(QuoteRequest::new)
+    .flatMap(q -> providers.stream()
+        .map(provider -> quoteFromProvider(q, provider))
+    ).collect(Collectors.toList());
           </code>
       </pre>
       </div>
       <div class="code-wrapper smaller">
       <pre>
           <code class="code java" data-trim data-noescape>
-    CompletableFuture&lt;List&lt;QuoteResult&gt;&gt; resultList =
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-            .thenApply(v -> futures.stream()
-                .map(CompletableFuture::join)
-                .collect(toList()));
+CompletableFuture&lt;List&lt;QuoteResult&gt;&gt; resultList =
+    CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+        .thenApply(v -> futures.stream()
+            .map(CompletableFuture::join)
+            .collect(toList()));
 
-    List&lt;QuoteResult&gt; rl = resultList.get();
-
-          </code>
-      </pre>
-      </div>
-    </section>
-
-    <section class="center" data-background="#333">
-      <h2>Orchestrator RxJava Observable</h2>
-      <div class="code-wrapper smaller">
-      <pre>
-          <code class="code java" data-trim data-noescape>
-  private Observable&lt;QuoteResult&gt; quoteFromProvider(QuoteRequest q, Provider p) {
-    return Observable.just(q)
-            .map(p::mapRequest)
-            .map(p::doReceiveQuote)
-            .map(p::mapResult)
-            .timeout(getTimeout(), TimeUnit.MILLISECONDS,
-                Observable.just(new QuoteResult(new TimeoutException("Timeout"))))
-        .subscribeOn(Schedulers.from(executorService));
-  }
+List&lt;QuoteResult&gt; rl = resultList.get();
           </code>
       </pre>
       </div>
@@ -726,25 +703,44 @@
       <div class="code-wrapper smaller">
       <pre>
           <code class="code java" data-trim data-noescape>
-  private Observable&lt;List&lt;QuoteResult&gt;&gt; quoteForAllProviders(QuoteRequest q) {
-    return Observable.fromIterable(providers)
-        .flatMap(p -> Observable.just(q)
-            .map(p::mapRequest)
-            .map(p::doReceiveQuote)
-            .map(p::mapResult)
-            .timeout(getTimeout(), TimeUnit.MILLISECONDS,
-                Observable.just(new QuoteResult(new TimeoutException("Timeout"))))
-            .subscribeOn(Schedulers.from(executorService)))
-        .toList()
-        .toObservable();
-  }
+private Observable&lt;QuoteResult&gt; quoteFromProvider(QuoteRequest q, Provider p) {
+  return Observable.just(q)
+          .map(p::mapRequest)
+          .map(p::doReceiveQuote)
+          .map(p::mapResult)
+          .timeout(getTimeout(), TimeUnit.MILLISECONDS,
+              Observable.just(new QuoteResult(new TimeoutException("Timeout"))))
+      .subscribeOn(Schedulers.from(executorService));
+}
+          </code>
+      </pre>
+      </div>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Orchestrator RxJava Observable</h2>
+      <div class="code-wrapper smaller">
+      <pre>
+          <code class="code java" data-trim data-noescape>
+private Observable&lt;List&lt;QuoteResult&gt;&gt; quoteForAllProviders(QuoteRequest q) {
+  return Observable.fromIterable(providers)
+      .flatMap(p -> Observable.just(q)
+          .map(p::mapRequest)
+          .map(p::doReceiveQuote)
+          .map(p::mapResult)
+          .timeout(getTimeout(), TimeUnit.MILLISECONDS,
+              Observable.just(new QuoteResult(new TimeoutException("Timeout"))))
+          .subscribeOn(Schedulers.from(executorService)))
+      .toList()
+      .toObservable();
+}
           </code>
       </pre>
       </div>
       <div class="code-wrapper smaller">
       <pre>
           <code class="code java" data-trim data-noescape>
-            List&lt;QuoteResult&gt; quotes = quoteForAllProviders(new QuoteRequest()).blockingSingle();
+List&lt;QuoteResult&gt; quotes = quoteForAllProviders(new QuoteRequest()).blockingSingle();
           </code>
       </pre>
       </div>
@@ -755,21 +751,21 @@
       <div class="code-wrapper smaller">
       <pre>
           <code class="code java" data-trim data-noescape>
-  private Flowable&lt;List&lt;QuoteResult&gt;&gt; quoteForAllProviders(QuoteRequest q) {
-    return Flowable.fromIterable(providers)
-        .flatMap(p -> Flowable.just(q)
-            .onBackpressureBuffer(1, () -> warn("Buffer Overflow"),
-                BackpressureOverflowStrategy.DROP_OLDEST)
-            .observeOn(Schedulers.from(executorService))
-            .map(p::mapRequest)
-            .map(p::doReceiveQuote)
-            .map(p::mapResult)
-            .timeout(getTimeout(), TimeUnit.MILLISECONDS,
-                Flowable.just(new QuoteResult(new TimeoutException("Timeout"))))
-            .subscribeOn(Schedulers.from(executorService)))
-        .toList()
-        .toFlowable();
-  }
+private Flowable&lt;List&lt;QuoteResult&gt;&gt; quoteForAllProviders(QuoteRequest q) {
+  return Flowable.fromIterable(providers)
+      .flatMap(p -> Flowable.just(q)
+          .onBackpressureBuffer(1, () -> warn("Buffer Overflow"),
+              BackpressureOverflowStrategy.DROP_OLDEST)
+          .observeOn(Schedulers.from(executorService))
+          .map(p::mapRequest)
+          .map(p::doReceiveQuote)
+          .map(p::mapResult)
+          .timeout(getTimeout(), TimeUnit.MILLISECONDS,
+              Flowable.just(new QuoteResult(new TimeoutException("Timeout"))))
+          .subscribeOn(Schedulers.from(executorService)))
+      .toList()
+      .toFlowable();
+}
           </code>
       </pre>
       </div>
@@ -780,25 +776,25 @@
       <div class="code-wrapper smaller">
       <pre>
           <code class="code java" data-trim data-noescape>
-    final AtomicBoolean running = new AtomicBoolean(true);
-    List&lt;QuoteResult&gt; results = new ArrayList<>();
-    PublishProcessor&lt;Long&gt; processor = PublishProcessor.create();
+final AtomicBoolean running = new AtomicBoolean(true);
+List&lt;QuoteResult&gt; results = new ArrayList<>();
+PublishProcessor&lt;Long&gt; processor = PublishProcessor.create();
 
-    Disposable subscribe = processor
-        .map(QuoteRequest::new)
-        .onBackpressureBuffer(100, () -> warn("Buffer Overflow "),
-            BackpressureOverflowStrategy.DROP_OLDEST)
-        .observeOn(Schedulers.from(executorService))
-        .flatMap(this::getForAllProviders)
-        .subscribe(results::addAll);
+Disposable subscribe = processor
+    .map(QuoteRequest::new)
+    .onBackpressureBuffer(100, () -> warn("Buffer Overflow "),
+        BackpressureOverflowStrategy.DROP_OLDEST)
+    .observeOn(Schedulers.from(executorService))
+    .flatMap(this::getForAllProviders)
+    .subscribe(results::addAll);
 
-    Flowable.interval(getRequestFrequency(), TimeUnit.MILLISECONDS, Schedulers.io())
-        .takeWhile(t -> running.get())
-        .subscribe(processor);
+Flowable.interval(getRequestFrequency(), TimeUnit.MILLISECONDS, Schedulers.io())
+    .takeWhile(t -> running.get())
+    .subscribe(processor);
 
-    Thread.sleep(getWaitingTime());
-    running.set(false);
-    subscribe.dispose();
+Thread.sleep(getWaitingTime());
+running.set(false);
+subscribe.dispose();
           </code>
       </pre>
       </div>
