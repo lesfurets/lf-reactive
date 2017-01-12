@@ -91,7 +91,7 @@
 
     <section class="center" data-background="#333">
       <h2>Service orchestrator</h2>
-      <img style="width: 75%;background-color: white" src="../img/scatter_gather.jpg">
+      <img style="width: 85%;background-color: white" src="../img/scatter_gather.jpg">
     </section>
 
     <!-- Eight Fallacies of distributed computing -->
@@ -192,7 +192,8 @@
 
     <section class="center" data-background="#333">
       <h2>Mastering concurrency is difficult.</h2>
-      <ul class="nodisc">
+      <div class="flushleft" style="position: absolute">
+      <ul class="nodisc small">
         <li>Thread pool management</li>
         <li>Access to shared state (deadlocks, race conditions)</li>
         <li>Error handling (i.e. timeouts)</li>
@@ -200,6 +201,10 @@
         <li>Throughput management</li>
         <li>...</li>
       </ul>
+      </div>
+      <div class="flushright" style="position: relative">
+        <img style="width: 25%;background-color: white" src="../img/java_concurrency.jpg">
+      </div>
     </section>
 
     <section class="center" data-background="#333">
@@ -253,7 +258,7 @@
       <div style="align-content: center;">
         <script type="text/template">
           ||ExecutorService |Message Queues|
-          |--|--|--|--|--|
+          |:--|--|--|--|--|
           |Thread management|+|+|
           |Shared state|-|-|
           |Composability|-|~|
@@ -265,7 +270,7 @@
 
     <section class="center" data-background="#333">
       <h2>Reactive Programming</h2>
-      <p>React to <span class="strong color-deeporange300">asyncronous</span>
+      <p>React to <span class="strong color-deeporange300">asynchronous</span>
         data / events<br>
         <span class="strong color-indigo300">+</span><br>
         [<span class="strong color-deeporange300">declarative</span> flow of data transformations]
@@ -296,10 +301,11 @@
       <div class="code-wrapper">
       <pre>
           <code class="code java" data-trim data-noescape>
-            public void httpAsyncGet(String url, AsyncCallback&lt;AsyncResult&gt;);
+            public void httpAsyncGet(String url, Handler&lt;String&gt;);
           </code>
       </pre>
-      </div>      <div class="code-wrapper">
+      </div>
+      <div class="code-wrapper">
       <pre>
           <code class="code java" data-trim data-noescape>
             httpAsyncGet("http://www.lesfurets.com", ar -> {
@@ -344,7 +350,7 @@
       <div class="flushleft">
         <script type="text/template">
           ||ExecutorService |Message Queues|Event Loops|CompletableFuture|
-          |--|--|--|--|--|
+          |:--|--|--|--|--|
           |Thread management|+|+|~|+|
           |Shared state|-|-|~|+|
           |Composability|-|~|-|+|
@@ -367,11 +373,13 @@
       <h2>Streams != Collections</h2>
       <p>
         <span class="strong">Collection</span><br>
-        <span class="color-indigo300">Definition of data</span>: Iterable group of items, definite size
+        <span class="color-indigo300 strong">Definition of data</span> : Iterable group of items,
+        <br>definite size
       </p>
       <p>
         <span class="strong">Stream</span><br>
-        <span class="color-indigo300">Define work</span>: Operations on group of items, unbounded size
+        <span class="color-indigo300 strong">Definition of work</span> : Operations on group of items,
+        <br>unbounded size
       </p>
     </section>
 
@@ -449,11 +457,13 @@
 
     <section class="center" data-background="#333">
       <h2>Reactive Streams</h2>
-      <p>RxJava2</p>
-      <p>Spring Reactor</p>
-      <p>Vert.x</p>
-      <p>Akka Streams</p>
-      <p>...</p>
+      <ul class="nodisc strong">
+        <li>RxJava2</li>
+        <li>Spring Reactor</li>
+        <li>Vert.x</li>
+        <li>Akka Streams</li>
+        <li>...</li>
+      </ul>
     </section>
 
     <section class="center" data-background="#333">
@@ -525,7 +535,7 @@
       <div class="flushleft">
         <script type="text/template">
           ||ExecutorService |Message Queues|Event Loops|CompletableFuture|RxJava2|
-          |--|--|--|--|--|
+          |:--|--|--|--|--|
           |Thread management|+|+|~|+|+|
           |Shared state|-|-|~|+|+|
           |Composability|-|~|-|+|+|
@@ -772,11 +782,21 @@
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Scheduling</h2>
-      <ul class="white nodisc">
-        <li>How to manage thread pools?</li>
-        <li>How to apply back pressure?</li>
-      </ul>
+      <h2>How to manage thread pools?</h2>
+      <p class="strong">
+        <span>Global</span><br>
+        <span class="color-deeporange300">vs</span><br>
+        <span>Per endpoint</span>
+      </p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>How to apply back pressure?</h2>
+      <p>
+        <span class="strong">Per endpoint</span><br>
+        <span class="strong color-deeporange300">vs</span><br>
+        <span class="strong">Not at all ?</span>
+      </p>
     </section>
 
     <section class="center" data-background="#333">
@@ -785,23 +805,28 @@
         <li>Difference between subsribeOn and observeOn</li>
         <li>Backpressure configuration</li>
         <li>Debugging and handling errors</li>
+        <li>Using with legacy code : accessing mutable state</li>
         <li>Creation of Observables</li>
       </ul>
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Perspectives</h2>
-      <h3>Managing SLAs</h3>
+      <h2><span class="color-deeporange300">Completable</span>Future</h2>
       <ul class="white nodisc">
-        <li>Choose buffer size and apply backpressure by endpoint</li>
-        <li>Implement Circuit breaker</li>
+        <li>Managing SLAs : implementing circuit breaker</li>
+        <li>Compare impact on request handling behavior</li>
+        <li>Benchmarking performance</li>
       </ul>
-      <h3>Compare behavior & performance</h3>
     </section>
 
     <section class="center" data-background="#333">
       <h2>Reactive Book</h2>
       <img style="width: 40%;background-color: white" src="../img/reactive/lrg.jpg">
+    </section>
+
+    <section class="center" data-state="background-furets">
+      <h2>Open Source @ Lesfurets</h2>
+      <a class="github" href="https://github.com/lesfurets" target="_blank">https://github.com/lesfurets</a>
     </section>
 
   </div>
