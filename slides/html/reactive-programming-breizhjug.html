@@ -252,6 +252,7 @@
       <img style="width: 75%;background-color: white" src="../img/reactive/jobqueue1.png">
       <p class="strong">Handle changes on throughput with buffering</p>
       <p class="strong color-deeporange300">What if workers can't keep up with events?</p>
+      <p class="strong color-deeporange300">java.lang.OutOfMemoryError</p>
     </section>
 
     <section class="center small" data-background="#333" data-markdown>
@@ -418,6 +419,8 @@
     <section class="center" data-background="#333">
       <h2>Back pressure ?</h2>
       <p class="strong">Remember message queues?</p>
+      <!--Back pressure describes the build-up of data, when the incoming task rate is higher than the system’s -->
+      <!--ability to process them – resulting in a buffer of unhandled data.-->
       <img style="width: 50%;background-color: white" src="../img/reactive/reactive-streams.001.png">
     </section>
 
@@ -451,7 +454,7 @@
       </pre>
       </div>
       <p class="strong">Included in Java 9<br>
-        <code>j.u.c.Flow</code>
+        <code>java.util.concurrent.Flow</code>
       </p>
     </section>
 
@@ -803,7 +806,7 @@
       <h2>Best practices & Pitfalls RxJava</h2>
       <ul class="white nodisc">
         <li>Difference between subsribeOn and observeOn</li>
-        <li>Backpressure configuration</li>
+        <li>Back pressure configuration</li>
         <li>Debugging and handling errors</li>
         <li>Using with legacy code : accessing mutable state</li>
         <li>Creation of Observables</li>
