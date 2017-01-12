@@ -90,12 +90,12 @@
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Service orchestrator</h2>
+      <h2>Service Orchestrator</h2>
       <img style="width: 85%;background-color: white" src="../img/scatter_gather.jpg">
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Service orchestrator</h2>
+      <h2>Service Orchestrator</h2>
       <img style="width: 75%;background-color: white" src="../img/sequence_diagram_one_client.jpg">
     </section>
 
@@ -177,6 +177,12 @@
 
     <section class="center" data-background="#333">
       <h2>How do we scale?</h2>
+      <img style="width: 75%;background-color: white" src="../img/sequence_diagram_thread_busy.jpg">
+      <p class="strong">Thread pool size per endpoint : 2</p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Buzzy thread pool</h2>
       <div class="code-wrapper">
       <pre>
           <code class="code java" data-trim data-noescape>
@@ -189,14 +195,9 @@ if (executor.getActiveCount() >= POOL_SIZE) {
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Busy thread pool</h2>
-      <img style="width: 75%;background-color: white" src="../img/sequence_diagram_thread_busy.jpg">
-    </section>
-
-    <section class="center" data-background="#333">
       <h2>Underlying problems</h2>
       <ul class="white nodisc">
-        <li><span class="strong color-indigo300">Scalability</span> : + resources =>  + performance</li>
+        <li><span class="strong color-indigo300">Scalability</span> : + resources &rarr; + performance</li>
         <li><span class="strong color-indigo300">Resilience</span> : SLA management</li>
         <li><span class="strong color-indigo300">Maintainability</span> : Clean code</li>
       </ul>
@@ -205,7 +206,7 @@ if (executor.getActiveCount() >= POOL_SIZE) {
     <section class="center" data-background="#333">
       <h2>Asynchronous execution</h2>
       <ul class="nodisc">
-        <li><span class="strong color-deeporange300">Scalability & Performance</span> : distribute tasks to multiple resources</li>
+        <li><span class="strong color-deeporange300">Scalability</span> : distribute tasks to multiple resources</li>
         <li><span class="strong color-deeporange300">Resilience</span> : isolation of errors</li>
       </ul>
     </section>
@@ -271,8 +272,9 @@ if (executor.getActiveCount() >= POOL_SIZE) {
       <h2>Message Queues</h2>
       <img style="width: 75%;background-color: white" src="../img/reactive/jobqueue1.png">
       <p class="strong">Handle changes on throughput with buffering</p>
-      <p class="strong color-deeporange300">What if workers can't keep up with events?</p>
-      <p class="strong color-deeporange300">java.lang.OutOfMemoryError</p>
+      <p class="strong color-indigo300">What if workers can't keep up with events?<br>
+        <span class="color-deeporange300">java.lang.OutOfMemoryError</span>
+      </p>
     </section>
 
     <section class="center small" data-background="#333" data-markdown>
@@ -296,7 +298,7 @@ if (executor.getActiveCount() >= POOL_SIZE) {
         <span class="strong color-indigo300">+</span><br>
         [<span class="strong color-deeporange300">declarative</span> flow of data transformations]
       </p>
-      <p><span class="strong color-deeporange300">!=</span><br>
+      <p><span class="strong color-deeporange300">&ne;</span><br>
         <span class="strong">Reactive Systems</span><br>
         Architectural design pattern for distributed systems
       </p>
@@ -419,8 +421,8 @@ if (executor.getActiveCount() >= POOL_SIZE) {
           </code>
       </pre>
       </div>
-      <p class="strong">Functional programming => <br>
-          immutability =><br>
+      <p class="strong">Functional programming &rarr; <br>
+          immutability &rarr;<br>
         <span class="color-indigo300">no more shared state</span>
       </p>
     </section>
@@ -547,11 +549,17 @@ if (executor.getActiveCount() >= POOL_SIZE) {
       <div class="code-wrapper">
       <pre>
           <code class="code java" data-trim data-noescape>
-            Observable.defer(() -> Observable.just(provider.getQuote())
-              .subscribeOn(Schedulers.from(executorService));
+            Observable.fromIterable(providers)
+              .subscribeOn(Schedulers.io())
+              .map(p -> p.getQuote())
+              .filter(q -> !q.hasError())
+              .observeOn(Schedulers.from(executorService))
+              .subscribe(System.out::println);
           </code>
       </pre>
       </div>
+      <p><code>subscribeOn</code>: on which thread events are <code>created</code>.</p>
+      <p><code>observeOn</code>: on which thread events are observed.</p>
     </section>
 
     <section class="small" data-background="#333" data-markdown>
