@@ -5,6 +5,9 @@ import static java.util.stream.Collectors.groupingBy;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -67,6 +70,38 @@ public class OrchestratorTest {
     }
 
     protected int getRequestFrequency() {
-        return 20;
+        return 200;
+    }
+
+    protected void benchmark(AtomicBoolean running,
+                             List<QuoteResult> results,
+                             Function<Long, List<QuoteResult>> handleRequest)
+            throws InterruptedException {
+        System.out.println("Starting");
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        final AtomicLong l = new AtomicLong(0L);
+        new Thread(() -> {
+            while (running.get()) {
+                executorService.execute(() -> {
+                    List<QuoteResult> resultList = handleRequest.apply(l.get());
+//                    System.out.println(resultList);
+                    results.addAll(resultList);
+                });
+                try {
+                    Thread.sleep(getRequestFrequency());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                l.incrementAndGet();
+            }
+        }).start();
+
+        System.out.println("Started");
+        Thread.sleep(getWaitingTime());
+        running.set(false);
+        Thread.sleep(100);
+        executorService.shutdownNow();
+        System.out.println("# of requests: "+l.get());
+        analyzeResults(results);
     }
 }
