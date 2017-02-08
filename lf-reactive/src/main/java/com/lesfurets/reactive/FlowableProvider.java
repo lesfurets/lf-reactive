@@ -35,4 +35,14 @@ public class FlowableProvider {
                         .subscribeOn(Schedulers.from(executor))
                         ;
     }
+
+    public Flowable<QuoteResult> doReceiveQuoteAsync(QuoteRequest request,
+                                                     FlowableTransformer<QuoteRequest, QuoteRequest> t) {
+        return Flowable.just(request)
+                .compose(t)
+                .map(q -> provider.doReceiveQuote(q))
+                .subscribeOn(Schedulers.from(executor))
+                        ;
+    }
+
 }
