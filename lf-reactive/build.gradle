@@ -1,10 +1,11 @@
 description = 'lesfurets-reactive-examples'
 dependencies {
     compile group: 'com.google.guava', name: 'guava', version: '20.0'
-    compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.0.1'
+    compile group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.0.5'
     compile group: 'io.vertx', name: 'vertx-core', version: '3.3.3'
     compile group: 'io.vertx', name: 'vertx-reactive-streams', version: '3.3.3'
     compile group: 'org.testng', name: 'testng', version:'5.14.10'
+    compile "com.github.akarnokd:rxjava2-extensions:0.15.0"
 
 }
 test.useTestNG()

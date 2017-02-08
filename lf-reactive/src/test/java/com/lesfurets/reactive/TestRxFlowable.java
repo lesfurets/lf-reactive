@@ -17,9 +17,10 @@ import com.google.common.base.Stopwatch;
 import com.lesfurets.reactive.model.QuoteRequest;
 import com.lesfurets.reactive.model.QuoteResult;
 
-import io.reactivex.BackpressureOverflowStrategy;
-import io.reactivex.Flowable;
+import hu.akarnokd.rxjava2.operators.FlowableTransformers;
+import io.reactivex.*;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.parallel.ParallelFlowable;
 import io.reactivex.processors.PublishProcessor;
 import io.reactivex.schedulers.Schedulers;
 
@@ -74,25 +75,38 @@ public class TestRxFlowable extends OrchestratorTest {
                                         Flowable.just(new QuoteResult(new TimeoutException("Timeout"), q.getOfferId(), p.provider.getId())));
     }
 
-  @Test
+    @Test
+    public void testBench() throws Exception {
+        final AtomicBoolean running = new AtomicBoolean(true);
+        List<QuoteResult> results = new ArrayList<>();
+
+        benchmark(running, results, (q) -> {
+            QuoteRequest request = new QuoteRequest(q, 0.0);
+            return this.requestFromAll(request).blockingSingle();
+        });
+
+    }
+
+    @Test
   public void testFlow() throws Exception {
       final AtomicBoolean running = new AtomicBoolean(true);
       List<QuoteResult> results = new ArrayList<>();
       PublishProcessor<Long> processor = PublishProcessor.create();
 
       Disposable subscribe = processor
-                      .onBackpressureBuffer(100, () -> System.out.println(Thread.currentThread().getName() + ": Buffer Overflow "), BackpressureOverflowStrategy.DROP_OLDEST)
+//                      .onBackpressureBuffer(1, () -> System.out.println(Thread.currentThread().getName() + ": Buffer Overflow "), BackpressureOverflowStrategy.DROP_OLDEST)
 //                      .onBackpressureDrop(quoteRequest -> System.out.println(Thread.currentThread().getName() + " Dropped " + quoteRequest))
-                      .observeOn(Schedulers.from(executorService))
+//                      .observeOn(Schedulers.from(executorService))
                       .map(l -> new QuoteRequest(l, 0.0))
                       .flatMap(this::requestFromAll)
-                      .subscribe(results::addAll);
+              .subscribe(results::addAll)
+              ;
 
       Flowable.interval(getRequestFrequency(), TimeUnit.MILLISECONDS, Schedulers.io())
                       .takeWhile(t -> running.get())
                       .subscribe(processor);
 
-      Thread.sleep(getWaitingTime());
+        Thread.sleep(getWaitingTime());
       running.set(false);
       subscribe.dispose();
       analyzeResults(results);
@@ -110,13 +124,17 @@ public class TestRxFlowable extends OrchestratorTest {
                           PublishProcessor<QuoteRequest> pp = PublishProcessor.create();
                           orchestrator.subscribe(pp);
                           return pp
-                                          .onBackpressureBuffer(10, () -> System.out.println(Thread.currentThread().getName() + ": Buffer Overflow "), BackpressureOverflowStrategy.DROP_OLDEST)
+                                          .onBackpressureBuffer(10, () ->
+                                                          System.out.println(Thread.currentThread().getName() + ": Buffer Overflow "),
+                                                  BackpressureOverflowStrategy.DROP_OLDEST)
                                           .observeOn(Schedulers.from(executorService))
                                           .flatMap(r -> this.request(r, new FlowableProvider(p, executorService)));
                       }).collect(toList());
 
       Disposable subscribe = Flowable.merge(flowables)
-                      .onBackpressureBuffer(10, () -> System.out.println(Thread.currentThread().getName() + ": Buffer Overflow "), BackpressureOverflowStrategy.DROP_OLDEST)
+                      .onBackpressureBuffer(10, () ->
+                              System.out.println(Thread.currentThread().getName() + ": Buffer Overflow "),
+                              BackpressureOverflowStrategy.DROP_OLDEST)
                       .observeOn(Schedulers.from(executorService))
                       .subscribe(results::add);
 
@@ -132,6 +150,36 @@ public class TestRxFlowable extends OrchestratorTest {
       Thread.sleep(100);
       analyzeResults(results);
   }
+
+    @Test
+    public void testBenchScatterFlow() throws Exception {
+        final AtomicBoolean running = new AtomicBoolean(true);
+        List<QuoteResult> results = new ArrayList<>();
+
+        PublishProcessor<QuoteRequest> orchestrator = PublishProcessor.create();
+        ParallelFlowable<QuoteRequest> parallel = ParallelFlowable.from(orchestrator);
+        List<PublishProcessor<QuoteRequest>> f = providers.stream().map(p -> {
+            PublishProcessor<QuoteRequest> pp = PublishProcessor.create();
+            pp
+                    .compose(FlowableTransformers.onBackpressureTimeout(10,
+                            getTimeout(), TimeUnit.MILLISECONDS, Schedulers.from(executorService),
+                            q -> System.out.println("Evicted" + q)))
+//                            .onBackpressureBuffer(10, () ->
+//                                            System.out.println(Thread.currentThread().getName() + ": Buffer Overflow "),
+//                                    BackpressureOverflowStrategy.DROP_OLDEST)
+                    .observeOn(Schedulers.from(executorService))
+                    .flatMap(r -> this.request(r, new FlowableProvider(p, executorService)))
+                    .subscribe(results::add);
+            return pp;
+        }).collect(toList());
+        parallel.subscribe(f.toArray(new PublishProcessor[0]));
+
+        benchmark(running, results, l -> {
+            orchestrator.onNext(new QuoteRequest(l, 0.0));
+            return Collections.emptyList();
+        });
+
+    }
 
     @Test
     public void testFlow2() throws Exception {
