@@ -24,7 +24,8 @@
   </script>
   <!--[if lt IE 9]>
   <script src="../bower_components/reveal.js/lib/js/html5shiv.js"></script><![endif]-->
-  <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?autoload=true&amp;skin=sunburst&amp;lang=java" defer=""></script>
+  <link rel="stylesheet" type="text/css" href="../js/sunburst.css">
+  <!--<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?autoload=true&amp;skin=sunburst&amp;lang=java" defer=""></script>-->
 </head>
 <body>
 <div id="footer" class="footer show">
@@ -868,6 +869,11 @@ class ExecutorSubscriber&lt;T&gt; implements Subscriber&lt;T&gt; {
       <img style="width: 40%;background-color: white" src="../img/reactive/lrg.jpg">
     </section>
 
+    <section class="center" data-background="#333">
+      <h2>Furets Book</h2>
+      <img style="width: 40%;background-color: white" src="../img/oreilly_furets_cover.jpg">
+    </section>
+
     <section class="center" data-state="background-furets">
       <h2>Slides & Examples</h2>
       <a class="github" href="https://github.com/lesfurets/lf-reactive" target="_blank">https://github.com/lesfurets/lf-reactive</a>
@@ -954,6 +960,11 @@ class ExecutorSubscriber&lt;T&gt; implements Subscriber&lt;T&gt; {
             {
                 src: '../bower_components/reveal.js/plugin/notes/notes.js', async: true, condition: function () {
                 return !!document.body.classList;
+            }
+            },
+            {
+                src: '../js/prettify.js', async: true, callback: function () {
+                PR.prettyPrint();
             }
             }
         ]
