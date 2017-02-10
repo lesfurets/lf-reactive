@@ -24,6 +24,7 @@
   </script>
   <!--[if lt IE 9]>
   <script src="../bower_components/reveal.js/lib/js/html5shiv.js"></script><![endif]-->
+  <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?autoload=true&amp;skin=sunburst&amp;lang=java" defer=""></script>
 </head>
 <body>
 <div id="footer" class="footer show">
@@ -35,7 +36,7 @@
   <a class="github" href="https://github.com/ozangunalp" target="_blank">https://github.com/ozangunalp</a>
   <a style="margin-right: 10px;" class="twitter" href="https://twitter.com/ozangunalp" target="_blank">@ozangunalp</a>
   <!--<img style="width:50px;vertical-align:middle;padding-left:25px" src="../img/theodo-logo-medium.png">-->
-  <span style="font-family:arial;font-weight:bold;font-size:25px;vertical-align:middle">BreizhJUG</span>
+  <span style="font-family:arial;font-weight:bold;font-size:25px;vertical-align:middle">Snowcamp</span>
 </div>
 <div class="reveal">
   <div class="slides">
@@ -47,7 +48,7 @@
       <h3>Ozan Gunalp</h3>
     </section>
 
-    <section class="flushleft" data-state="background-furets">
+    <section class="flushleft" data-state="background-grenoble">
       <h3 style="color:#f07d00">Ozan GUNALP</h3>
       <ul class="flushright nodisc">
         <li>
@@ -76,7 +77,7 @@
 
     <section class="center" data-background="#333">
       <h2>LesFurets.com</h2>
-      <ul class="white nodisc">
+      <ul class="white strong nodisc">
         <li>Apache Tomcat Blocking IO</li>
         <li>GWT RPC on Servlet</li>
       </ul>
@@ -104,25 +105,28 @@
       <img style="width: 75%;background-color: white" src="../img/sequence_diagram_two_client.jpg">
     </section>
 
-    <!-- Eight Fallacies of distributed computing -->
-    <!--<li>1.	The network is reliable</li>-->
-    <!--<li>2.	Latency is zero</li>-->
-    <!--<li>3.	Bandwidth is infinite</li>-->
-    <!--<li>4.	The network is secure</li>-->
-    <!--<li>5.	Topology doesn't change</li>-->
-    <!--<li>6.	There is one administrator</li>-->
-    <!--<li>7.	Transport cost is zero</li>-->
-    <!--<li>8.	The network is homogeneous</li>-->
+
     <section class="center" data-background="#333">
       <h2>Distributed Computing Fallacies</h2>
       <div class="flushleft">
-        <ul class="white nodisc">
-            <li>The network is <strong>NOT</strong> reliable</li>
-            <li>Latency is <strong>NOT</strong> zero</li>
+        <ul class="white strong nodisc">
+            <li>The network is reliable. <strong>NOT</strong></li>
+            <li>Latency is zero. <strong>NOT</strong></li>
             <li>...</li>
-            <li>There is <strong>NOT</strong> one administrator</li>
+            <li>There is one administrator. <strong>NOT</strong></li>
         </ul>
       </div>
+      <aside class="notes">
+         Illusions de l'informatique
+        <li>1.	The network is reliable</li>
+        <li>2.	Latency is zero</li>
+        <li>3.	Bandwidth is infinite</li>
+        <li>4.	The network is secure</li>
+        <li>5.	Topology doesn't change</li>
+        <li>6.	There is one administrator</li>
+        <li>7.	Transport cost is zero</li>
+        <li>8.	The network is homogeneous</li>
+      </aside>
     </section>
 
     <section class="center" data-background="#333">
@@ -143,33 +147,33 @@
     <section class="center" data-background="#333">
       <h2>Clean-er code ?</h2>
       <div class="code-wrapper smaller">
-      <pre>
-          <code class="code java" data-trim data-noescape>
-    private Map doQuotation(ResultatTarifications resultat, Control control, List products) {
-        //...
-        final List runnables = new ArrayList<>();
-        try {
-            prepareRunnables(runnables, projet, resultat, products, control, ...);
-            long timeOut = control.getConnectionTimeout();
-            final long startTime = System.currentTimeMillis();
-            for (OrchestratorRunnable runnable : runnables) {
-                // .. mapping in, web service call, mapping out
-                executeRunnable(timeOut, startTime, runnable);
-            }
-            waitAll(startTime, getModule(), runnables, timeOut);
-            logTarificationTimer(runnables, startTime);
-            postTraitements(resultat);
-        } catch (Throwable t) {
-            LOG.error("Error occurs during tarifications " + projet.getOffreUid(), t);
-        } finally {
-            checkResultat(resultat);
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+private Map doQuotation(ResultatTarifications resultat, Control control, List products) {
+    //...
+    final List runnables = new ArrayList<>();
+    try {
+        prepareRunnables(runnables, projet, resultat, products, control, ...);
+        long timeOut = control.getConnectionTimeout();
+        final long startTime = System.currentTimeMillis();
+        for (OrchestratorRunnable runnable : runnables) {
+            // .. mapping in, web service call, mapping out
+            executeRunnable(timeOut, startTime, runnable);
         }
-        final Map contexts = new HashMap<>();
-        for (TarificationRunnable runnable : runnables) {
-            contexts.put(runnable.getProvider(), runnable.getContext());
-        }
-        return Collections.unmodifiableMap(contexts);
+        waitAll(startTime, getModule(), runnables, timeOut);
+        logTarificationTimer(runnables, startTime);
+        postTraitements(resultat);
+    } catch (Throwable t) {
+        LOG.error("Error occurs during tarifications " + projet.getOffreUid(), t);
+    } finally {
+        checkResultat(resultat);
     }
+    final Map contexts = new HashMap<>();
+    for (TarificationRunnable runnable : runnables) {
+        contexts.put(runnable.getProvider(), runnable.getContext());
+    }
+    return Collections.unmodifiableMap(contexts);
+}
           </code>
       </pre>
       </div>
@@ -184,8 +188,8 @@
     <section class="center" data-background="#333">
       <h2>Buzzy thread pool</h2>
       <div class="code-wrapper">
-      <pre>
-          <code class="code java" data-trim data-noescape>
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
 if (executor.getActiveCount() >= POOL_SIZE) {
     throw new NoExecutorAvailable("ThreadPool buzy");
 }
@@ -197,24 +201,24 @@ if (executor.getActiveCount() >= POOL_SIZE) {
     <section class="center" data-background="#333">
       <h2>Underlying problems</h2>
       <ul class="white nodisc">
-        <li><span class="strong color-indigo300">Scalability</span> : + resources &rarr; + performance</li>
-        <li><span class="strong color-indigo300">Resilience</span> : SLA management</li>
-        <li><span class="strong color-indigo300">Maintainability</span> : Clean code</li>
+        <li><span class="strong color-deeporange300">Scalability</span> : + resources &rarr; + performance</li>
+        <li><span class="strong color-deeporange300">Resilience</span> : SLA management</li>
+        <li><span class="strong color-deeporange300">Maintainability</span> : Clean code</li>
       </ul>
     </section>
 
     <section class="center" data-background="#333">
       <h2>Asynchronous execution</h2>
       <ul class="nodisc">
-        <li><span class="strong color-deeporange300">Scalability</span> : distribute tasks to multiple resources</li>
-        <li><span class="strong color-deeporange300">Resilience</span> : isolation of errors</li>
+        <li><span class="strong color-indigo300">Scalability</span> : distribute tasks to multiple resources</li>
+        <li><span class="strong color-indigo300">Resilience</span> : isolation of errors</li>
       </ul>
     </section>
 
     <section class="center" data-background="#333">
       <h2>Mastering concurrency is difficult.</h2>
       <div class="flushleft" style="position: absolute">
-      <ul class="nodisc small">
+      <ul class="nodisc strong small">
         <li>Thread pool management</li>
         <li>Access to shared state (deadlocks, race conditions)</li>
         <li>Error handling (i.e. timeouts)</li>
@@ -230,8 +234,8 @@ if (executor.getActiveCount() >= POOL_SIZE) {
 
     <section class="center" data-background="#333">
       <h2>Asynchronous abstractions</h2>
-      <ul class="white nodisc">
-        <li>ExecutorService and locks</li>
+      <ul class="white strong nodisc">
+        <li>Thread pools and locks</li>
         <li>Message queues with buffering</li>
       </ul>
     </section>
@@ -239,9 +243,9 @@ if (executor.getActiveCount() >= POOL_SIZE) {
     <section class="center" data-background="#333">
       <h2>Synchronous API</h2>
       <div class="code-wrapper">
-      <pre>
-          <code class="code java" data-trim data-noescape>
-            public String httpBlockingGet(String url);
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+public String httpBlockingGet(String url);
           </code>
       </pre>
       </div>
@@ -250,19 +254,19 @@ if (executor.getActiveCount() >= POOL_SIZE) {
     <section class="center" data-background="#333">
       <h2>ExecutorService</h2>
       <div class="code-wrapper">
-      <pre>
-          <code class="code java" data-trim data-noescape>
-                ExecutorService executor = Executors.newCachedThreadPool();
-    Future&lt;String&gt; http = executor.submit(() -> {
-      try {
-        return httpBlockingGet("http://www.lesfurets.com");
-      } catch (Exception e) {
-        e.printStackTrace();
-        return "Error :"+e.getMessage();
-      }
-    });
-    // blocking get
-    String content = http.get();
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+ExecutorService executor = Executors.newCachedThreadPool();
+Future&lt;String&gt; http = executor.submit(() -> {
+  try {
+    return httpBlockingGet("http://www.lesfurets.com");
+  } catch (Exception e) {
+    e.printStackTrace();
+    return "Error :"+e.getMessage();
+  }
+});
+// blocking get
+String content = http.get();
           </code>
       </pre>
       </div>
@@ -293,10 +297,10 @@ if (executor.getActiveCount() >= POOL_SIZE) {
 
     <section class="center" data-background="#333">
       <h2>Reactive Programming</h2>
-      <p>React to <span class="strong color-deeporange300">asynchronous</span>
+      <p>React to <span class="strong color-indigo300">asynchronous</span>
         data / events<br>
-        <span class="strong color-indigo300">+</span><br>
-        [<span class="strong color-deeporange300">declarative</span> flow of data transformations]
+        <span class="strong color-deeporange300">+</span><br>
+        [<span class="strong color-indigo300">declarative</span> flow of data transformations]
       </p>
       <p><span class="strong color-deeporange300">&ne;</span><br>
         <span class="strong">Reactive Systems</span><br>
@@ -306,9 +310,9 @@ if (executor.getActiveCount() >= POOL_SIZE) {
 
     <section class="center" data-background="#333">
       <h2>Reactive abstractions</h2>
-      <ul class="white nodisc">
+      <ul class="white strong nodisc">
         <li>Event loops with callbacks</li>
-        <li>Promise/Future/CompletableFuture</li>
+        <li>Promise / Future / CompletableFuture</li>
         <li>Reactive Streams</li>
       </ul>
     </section>
@@ -322,25 +326,24 @@ if (executor.getActiveCount() >= POOL_SIZE) {
     <section class="center" data-background="#333">
       <h2>Asynchronous Callback</h2>
       <div class="code-wrapper">
-      <pre>
-          <code class="code java" data-trim data-noescape>
-            public void httpAsyncGet(String url, Handler&lt;String&gt;);
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+public void httpAsyncGet(String url, Handler&lt;String&gt;);
           </code>
       </pre>
       </div>
       <div class="code-wrapper">
-      <pre>
-          <code class="code java" data-trim data-noescape>
-            httpAsyncGet("http://www.lesfurets.com", ar -> {
-              if (ar.isSuccess()) {
-                String content = ar.result();
-                // do something
-              } else {
-                Throwable e = ar.error();
-                // handle error
-              }
-            });
-          </code>
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+httpAsyncGet("http://www.lesfurets.com", ar -> {
+  if (ar.succeeded()) {
+    String content = ar.result();
+    // do something
+  } else {
+    Throwable e = ar.error();
+    // handle error
+  }
+});</code>
       </pre>
       </div>
       <p class="strong color-deeporange300">Death by callback</p>
@@ -350,19 +353,19 @@ if (executor.getActiveCount() >= POOL_SIZE) {
       <h2>CompletableFuture</h2>
         <!--<li>Represents the result of an action that may, or may not, have occurred yet.</li>-->
       <div class="code-wrapper">
-      <pre>
-          <code class="code java" data-trim data-noescape>
-          CompletableFuture.supplyAsync(() -> {
-      try {
-        return httpBlockingGet("http://www.lesfurets.com");
-      } catch (Exception e) {
-        return "Error :"+e.getMessage();
-      }
-    }, executor)
-        .thenApply(c -> searchTitle(c))
-        .thenAccept(s -> {
-          // use title
-        });
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+CompletableFuture.supplyAsync(() -> {
+  try {
+    return httpBlockingGet("http://www.lesfurets.com");
+  } catch (Exception e) {
+    return "Error :"+e.getMessage();
+  }
+}, executor)
+    .thenApply(c -> searchTitle(c))
+    .thenAccept(s -> {
+      // use title
+    });
           </code>
       </pre>
       </div>
@@ -388,12 +391,12 @@ if (executor.getActiveCount() >= POOL_SIZE) {
     <section class="center" data-background="#333">
       <h2>
         <span class="color-indigo300">Reactive</span>
-        <span class="color-deeporange300">Streams</span>
+        Streams
       </h2>
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Streams != Collections</h2>
+      <h2>Streams <span class="color-deeporange300">!=</span> Collections</h2>
       <p>
         <span class="strong">Collection</span><br>
         <span class="color-indigo300 strong">Definition of data</span> : Iterable group of items,
@@ -409,15 +412,15 @@ if (executor.getActiveCount() >= POOL_SIZE) {
     <section class="center" data-background="#333">
       <h2>Streams Java 8</h2>
       <div class="code-wrapper">
-      <pre>
-          <code class="code java" data-trim data-noescape>
-            List&lt;QuoteResult&gt; resultList = LongStream.range(0, 11)
-            .boxed()
-            .map(l -> new QuoteRequest(l))
-            .filter(l -> !fromRobot(l))
-            .map(q -> q.toAnonymousRequest())
-            .peek(System.out::println)
-            .collect(Collectors.toList());
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+List&lt;QuoteResult&gt; resultList = LongStream.range(0, 11)
+  .boxed()
+  .map(l -> new QuoteRequest(l))
+  .filter(l -> !fromRobot(l))
+  .map(q -> q.toAnonymousRequest())
+  .peek(System.out::println)
+  .collect(Collectors.toList());
           </code>
       </pre>
       </div>
@@ -430,11 +433,11 @@ if (executor.getActiveCount() >= POOL_SIZE) {
     <section class="center" data-background="#333">
       <h2>Reactive Streams</h2>
       <p>
-        <span class="strong color-deeporange300">asynchronous</span> events<br>
-        <span class="strong color-indigo300">+</span><br>
-        <span class="strong color-deeporange300">declarative</span> functions<br>
-        <span class="strong color-indigo300">+</span><br>
-        non-blocking <span class="strong color-deeporange300">back pressure</span>
+        <span class="strong color-indigo300">asynchronous</span> events<br>
+        <span class="strong color-deeporange300">+</span><br>
+        <span class="strong color-indigo300">declarative</span> functions<br>
+        <span class="strong color-deeporange300">+</span><br>
+        non-blocking <span class="strong color-indigo300">back pressure</span>
       </p>
     </section>
 
@@ -455,23 +458,23 @@ if (executor.getActiveCount() >= POOL_SIZE) {
     <section class="center" data-background="#333">
       <h2>Reactive Streams</h2>
       <div class="code-wrapper smaller">
-      <pre>
-          <code class="code java" data-trim data-noescape>
-  public interface Publisher&lt;T&gt; {
-    void subscribe(Subscriber&lt;? super &lt;T&gt; subscriber);
-  }
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+public interface Publisher&lt;T&gt; {
+  void subscribe(Subscriber&lt;? super &lt;T&gt; subscriber);
+}
 
-  public interface Subscriber&lt;T&gt; {
-    void onSubscribe(Subscription subscription);
-    void onNext(T item);
-    void onError(Throwable throwable);
-    void onComplete();
-  }
+public interface Subscriber&lt;T&gt; {
+  void onSubscribe(Subscription subscription);
+  void onNext(T item);
+  void onError(Throwable throwable);
+  void onComplete();
+}
 
-  public interface Subscription {
-    void request(long n);
-    void cancel();
-  }
+public interface Subscription {
+  void request(long n);
+  void cancel();
+}
           </code>
       </pre>
       </div>
@@ -501,44 +504,35 @@ if (executor.getActiveCount() >= POOL_SIZE) {
     <section class="center" data-background="#333">
       <h2>Observables</h2>
       <div class="code-wrapper">
-      <pre>
-          <code class="code java" data-trim data-noescape>
-    Observable.create(observer -> {
-      try {
-        observer.onNext(provider.getQuote());
-        observer.onComplete();
-      } catch (Exception e) {
-        observer.onError(e);
-      }
-    });
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+Observable.create(observer -> {
+  try {
+    observer.onNext(provider.getQuote());
+    observer.onComplete();
+  } catch (Exception e) {
+    observer.onError(e);
+  }
+});
+
+Observable.defer(() -> Observable.just(provider.getQuote());
+
+Observable.just(1,2,3,4);
           </code>
       </pre>
       </div>
-      <div class="code-wrapper">
-      <pre>
-          <code class="code java" data-trim data-noescape>
-            Observable.defer(() -> Observable.just(provider.getQuote());
-          </code>
-      </pre>
-      </div>
-      <div class="code-wrapper">
-      <pre>
-          <code class="code java" data-trim data-noescape>
-            Observable.just(1,2,3,4);
-          </code>
-      </pre>
-      </div>
+      <p class="strong">Event / Data / Task</p>
     </section>
 
     <section class="center" data-background="#333">
       <h2>Operators</h2>
       <div class="code-wrapper">
-      <pre>
-          <code class="code java" data-trim data-noescape>
-            Observable.fromIterable(providers)
-              .map(p -> p.getQuote())
-              .filter(q -> !q.hasError())
-              .subscribe(System.out::println);
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+Observable.fromIterable(providers)
+  .map(p -> p.getQuote())
+  .filter(q -> !q.hasError())
+  .subscribe(System.out::println);
           </code>
       </pre>
       </div>
@@ -547,19 +541,19 @@ if (executor.getActiveCount() >= POOL_SIZE) {
     <section class="center" data-background="#333">
       <h2>Scheduling</h2>
       <div class="code-wrapper">
-      <pre>
-          <code class="code java" data-trim data-noescape>
-            Observable.fromIterable(providers)
-              .subscribeOn(Schedulers.io())
-              .map(p -> p.getQuote())
-              .filter(q -> !q.hasError())
-              .observeOn(Schedulers.from(executorService))
-              .subscribe(System.out::println);
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+Observable.fromIterable(providers)
+  .subscribeOn(Schedulers.io())
+  .map(p -> p.getQuote())
+  .filter(q -> !q.hasError())
+  .observeOn(Schedulers.from(executorService))
+  .subscribe(System.out::println);
           </code>
       </pre>
       </div>
-      <p><code>subscribeOn</code>: on which thread events are <code>created</code>.</p>
-      <p><code>observeOn</code>: on which thread events are observed.</p>
+      <p  class="strong"><code>subscribeOn</code>: on which thread events are <code>created</code>.</p>
+      <p class="strong"><code>observeOn</code>: on which thread events are observed.</p>
     </section>
 
     <section class="small" data-background="#333" data-markdown>
@@ -579,33 +573,33 @@ if (executor.getActiveCount() >= POOL_SIZE) {
     <section class="center" data-background="#333">
       <h2>Orchestrator</h2>
       <div class="code-wrapper smaller">
-      <pre>
-          <code class="code java" data-trim data-noescape>
-    private Map doQuotation(ResultatTarifications resultat, Control control, List products) {
-        //...
-        final List runnables = new ArrayList<>();
-        try {
-            prepareRunnables(runnables, projet, resultat, products, control, ...);
-            long timeOut = control.getConnectionTimeout();
-            final long startTime = System.currentTimeMillis();
-            for (OrchestratorRunnable runnable : runnables) {
-                // .. mapping in, web service call, mapping out
-                executeRunnable(timeOut, startTime, runnable);
-            }
-            waitAll(startTime, getModule(), runnables, timeOut);
-            logTarificationTimer(runnables, startTime);
-            postTraitements(resultat);
-        } catch (Throwable t) {
-            LOG.error("Error occurs during tarifications " + projet.getOffreUid(), t);
-        } finally {
-            checkResultat(resultat);
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+private Map doQuotation(ResultatTarifications resultat, Control control, List products) {
+    //...
+    final List runnables = new ArrayList<>();
+    try {
+        prepareRunnables(runnables, projet, resultat, products, control, ...);
+        long timeOut = control.getConnectionTimeout();
+        final long startTime = System.currentTimeMillis();
+        for (OrchestratorRunnable runnable : runnables) {
+            // .. mapping in, web service call, mapping out
+            executeRunnable(timeOut, startTime, runnable);
         }
-        final Map contexts = new HashMap<>();
-        for (TarificationRunnable runnable : runnables) {
-            contexts.put(runnable.getProvider(), runnable.getContext());
-        }
-        return Collections.unmodifiableMap(contexts);
+        waitAll(startTime, getModule(), runnables, timeOut);
+        logTarificationTimer(runnables, startTime);
+        postTraitements(resultat);
+    } catch (Throwable t) {
+        LOG.error("Error occurs during tarifications " + projet.getOffreUid(), t);
+    } finally {
+        checkResultat(resultat);
     }
+    final Map contexts = new HashMap<>();
+    for (TarificationRunnable runnable : runnables) {
+        contexts.put(runnable.getProvider(), runnable.getContext());
+    }
+    return Collections.unmodifiableMap(contexts);
+}
           </code>
       </pre>
       </div>
@@ -615,20 +609,18 @@ if (executor.getActiveCount() >= POOL_SIZE) {
       <h2>Orchestrator parallel stream</h2>
 
       <div class="code-wrapper smaller">
-      <pre>
-          <code class="code java" data-trim data-noescape>
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+QuoteRequest q = ..
 ForkJoinPool forkJoinPool = new ForkJoinPool(10);
 
 ForkJoinTask&lt;List&lt;QuoteResult&gt;&gt; submit = forkJoinPool.submit(() ->
-    LongStream.range(0, 11).parallel()
-        .boxed()
-        .map(QuoteRequest::new)
-        .flatMap(q -> providers.stream().parallel()
-                // map in
-                .map(p -> p.doReceiveQuote(q))
-                // map out
-        )
-        .collect(Collectors.toList())
+    providers.stream().parallel()
+            // map in
+            .map(p -> p.doReceiveQuote(q))
+            // map out
+    )
+    .collect(Collectors.toList())
 );
 
 List&lt;QuoteResult&gt; results = submit.get();
@@ -636,8 +628,8 @@ List&lt;QuoteResult&gt; results = submit.get();
       </pre>
       </div>
 <!--      <div class="code-wrapper smaller">
-      <pre>
-          <code class="code java" data-trim data-noescape>
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
             List&lt;QuoteResult&gt; results = submit.get();
 
             ForkJoinTask&lt;List&lt;QuoteResult&gt;&gt; submit = forkJoinPool
@@ -662,15 +654,14 @@ List&lt;QuoteResult&gt; results = submit.get();
     <section class="center" data-background="#333">
       <h2>Orchestrator CompletableFuture</h2>
       <div class="code-wrapper smaller">
-      <pre>
-          <code class="code java" data-trim data-noescape>
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
 private CompletableFuture&lt;QuoteResult&gt; quoteFromProvider(QuoteRequest q, Provider provider) {
-  return CompletableFuture.supplyAsync(() ->
-          provider.doReceiveQuote(q),
-      executorService)
+  return CompletableFuture.supplyAsync(() -> provider.doReceiveQuote(q), executorService)
       .thenApply(provider::mapResult)
-      .completeOnTimeout(new QuoteResult(new TimeoutException("Timeout")),
-          getTimeout(), TimeUnit.MILLISECONDS);
+      <span class="fragment">.completeOnTimeout(new QuoteResult(new TimeoutException("Timeout")),
+          getTimeout(), TimeUnit.MILLISECONDS)</span>
+      ;
 }
           </code>
       </pre>
@@ -680,20 +671,18 @@ private CompletableFuture&lt;QuoteResult&gt; quoteFromProvider(QuoteRequest q, P
     <section class="center" data-background="#333">
       <h2>Orchestrator CompletableFuture</h2>
       <div class="code-wrapper smaller">
-      <pre>
-          <code class="code java" data-trim data-noescape>
-List&lt;CompletableFuture&lt;QuoteResult&gt;&gt; futures = LongStream.range(0, 11).sequential()
-    .boxed()
-    .map(QuoteRequest::new)
-    .flatMap(q -> providers.stream()
-        .map(provider -> quoteFromProvider(q, provider))
-    ).collect(Collectors.toList());
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+QuoteRequest q = ..
+List&lt;CompletableFuture&lt;QuoteResult&gt;&gt; futures = providers.stream()
+                .map(provider -> quoteFromProvider(q, provider))
+                .collect(Collectors.toList());
           </code>
       </pre>
       </div>
       <div class="code-wrapper smaller">
-      <pre>
-          <code class="code java" data-trim data-noescape>
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
 CompletableFuture&lt;List&lt;QuoteResult&gt;&gt; resultList =
     CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
         .thenApply(v -> futures.stream()
@@ -709,8 +698,8 @@ List&lt;QuoteResult&gt; rl = resultList.get();
     <section class="center" data-background="#333">
       <h2>Orchestrator RxJava Observable</h2>
       <div class="code-wrapper smaller">
-      <pre>
-          <code class="code java" data-trim data-noescape>
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
 private Observable&lt;QuoteResult&gt; quoteFromProvider(QuoteRequest q, Provider p) {
   return Observable.just(q)
           .map(p::mapRequest)
@@ -728,17 +717,11 @@ private Observable&lt;QuoteResult&gt; quoteFromProvider(QuoteRequest q, Provider
     <section class="center" data-background="#333">
       <h2>Orchestrator RxJava Observable</h2>
       <div class="code-wrapper smaller">
-      <pre>
-          <code class="code java" data-trim data-noescape>
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
 private Observable&lt;List&lt;QuoteResult&gt;&gt; quoteForAllProviders(QuoteRequest q) {
   return Observable.fromIterable(providers)
-      .flatMap(p -> Observable.just(q)
-          .map(p::mapRequest)
-          .map(p::doReceiveQuote)
-          .map(p::mapResult)
-          .timeout(getTimeout(), TimeUnit.MILLISECONDS,
-              Observable.just(new QuoteResult(new TimeoutException("Timeout"))))
-          .subscribeOn(Schedulers.from(executorService)))
+      .flatMap(p -> quoteFromProvider(p, q))
       .toList()
       .toObservable();
 }
@@ -746,8 +729,8 @@ private Observable&lt;List&lt;QuoteResult&gt;&gt; quoteForAllProviders(QuoteRequ
       </pre>
       </div>
       <div class="code-wrapper smaller">
-      <pre>
-          <code class="code java" data-trim data-noescape>
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
 List&lt;QuoteResult&gt; quotes = quoteForAllProviders(new QuoteRequest()).blockingSingle();
           </code>
       </pre>
@@ -757,14 +740,14 @@ List&lt;QuoteResult&gt; quotes = quoteForAllProviders(new QuoteRequest()).blocki
     <section class="center" data-background="#333">
       <h2>Orchestrator RxJava2 Flowable</h2>
       <div class="code-wrapper smaller">
-      <pre>
-          <code class="code java" data-trim data-noescape>
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
 private Flowable&lt;List&lt;QuoteResult&gt;&gt; quoteForAllProviders(QuoteRequest q) {
   return Flowable.fromIterable(providers)
       .flatMap(p -> Flowable.just(q)
           .onBackpressureBuffer(1, () -> warn("Buffer Overflow"),
               BackpressureOverflowStrategy.DROP_OLDEST)
-          .observeOn(Schedulers.from(executorService))
+          .observeOn(Schedulers.from(computation))
           .map(p::mapRequest)
           .map(p::doReceiveQuote)
           .map(p::mapResult)
@@ -780,69 +763,103 @@ private Flowable&lt;List&lt;QuoteResult&gt;&gt; quoteForAllProviders(QuoteReques
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Orchestrator RxJava2 Flowable</h2>
+      <h2>Orchestrator RxJava2 Processor</h2>
       <div class="code-wrapper smaller">
-      <pre>
-          <code class="code java" data-trim data-noescape>
-final AtomicBoolean running = new AtomicBoolean(true);
-List&lt;QuoteResult&gt; results = new ArrayList<>();
-PublishProcessor&lt;Long&gt; processor = PublishProcessor.create();
+      <pre class="prettyprint" style="background-color: transparent">
+          <code class="code language-java" data-trim data-noescape>
+Executors.newFixedThreadPool(10);
+Scheduler scheduler = Schedulers.from(executor);
 
-Disposable subscribe = processor
-    .map(QuoteRequest::new)
-    .onBackpressureBuffer(100, () -> warn("Buffer Overflow "),
-        BackpressureOverflowStrategy.DROP_OLDEST)
-    .observeOn(Schedulers.from(executorService))
-    .flatMap(this::getForAllProviders)
-    .subscribe(results::addAll);
-
-Flowable.interval(getRequestFrequency(), TimeUnit.MILLISECONDS, Schedulers.io())
-    .takeWhile(t -> running.get())
-    .subscribe(processor);
-
-Thread.sleep(getWaitingTime());
-running.set(false);
-subscribe.dispose();
+PublishProcessor&lt;QuoteResult&gt; processor = PublishProcessor.create();
+ExecutorSubscriber&lt;QuoteResult&gt; subscriber = new ExecutorSubscriber<>(executor);
+processor
+        .onBackpressureDrop(quote -> warn("Drop " + quote.getOfferId()))
+        .observeOn(Schedulers.computation(), false, 5)
+        .flatMap(q -> Flowable.fromCallable(() -> {
+                    runQuote(q);
+                    return q;
+                }).subscribeOn(scheduler)
+                        .timeout(1000, MILLISECONDS, Schedulers.computation())
+                        .onErrorReturn(throwable -> {
+                            warn("Error " + throwable);
+                            throwable.printStackTrace();
+                            return q;
+                        })
+                , false, 10, 5)
+        .subscribeWith(subscriber);
+...
+processor.onNext(new QuoteRequest());
+subscriber.requestIfNeeded();
+waitForCompletion();
           </code>
       </pre>
       </div>
     </section>
 
     <section class="center" data-background="#333">
-      <h2>How to manage thread pools?</h2>
-      <p class="strong">
-        <span>Global</span><br>
-        <span class="color-deeporange300">vs</span><br>
-        <span>Per endpoint</span>
-      </p>
+      <h2>Orchestrator RxJava2 Subscriber</h2>
+      <div class="code-wrapper smaller">
+      <pre class="prettyprint" style="background-color: transparent">
+          <code class="code language-java" data-trim data-noescape>
+class ExecutorSubscriber&lt;T&gt; implements Subscriber&lt;T&gt; {
+
+  Subscription s;
+  ThreadPoolExecutor e;
+
+  public void requestIfNeeded() {
+      if (e.getActiveCount() < 10)
+          s.request(1);
+  }
+          </code>
+      </pre>
+      </div>
     </section>
 
     <section class="center" data-background="#333">
-      <h2>How to apply back pressure?</h2>
-      <p>
-        <span class="strong">Per endpoint</span><br>
-        <span class="strong color-deeporange300">vs</span><br>
-        <span class="strong">Not at all ?</span>
-      </p>
-    </section>
-
-    <section class="center" data-background="#333">
-      <h2>Best practices & Pitfalls RxJava</h2>
-      <ul class="white nodisc">
-        <li>Difference between subsribeOn and observeOn</li>
-        <li>Back pressure configuration</li>
-        <li>Debugging and handling errors</li>
-        <li>Using with legacy code : accessing mutable state</li>
-        <li>Creation of Observables</li>
+      <h2>How to manage endpoints?</h2>
+      <ul class="white strong nodisc">
+        <li>Back pressure per endpoint</li>
+        <li>Scalable thread pools</li>
+        <li>Common thread pool with scaling</li>
+        <li>Prioritizing different types of calls</li>
       </ul>
     </section>
 
     <section class="center" data-background="#333">
-      <h2><span class="color-deeporange300">Completable</span>Future</h2>
-      <ul class="white nodisc">
-        <li>Managing SLAs : implementing circuit breaker</li>
-        <li>Compare impact on request handling behavior</li>
-        <li>Benchmarking performance</li>
+      <h2>Testing & Benchmarking</h2>
+      <ul class="white strong nodisc">
+        <li><code>TestSubscriber</code></li>
+        <li><span class="color-indigo300">Reactivity Test Scenarios</span>: Long-term stress, short bursts</li>
+        <li><span class="color-indigo300">Execution performance</span>: <a href="https://akarnokd.blogspot.fr/">https://akarnokd.blogspot.fr/</a></li>
+      </ul>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Migrating to Reactive Streams</h2>
+      <ul class="white strong nodisc">
+        <li>Encapsulate your good old runnables</li>
+        <li>Handle errors & timeouts</li>
+        <li>Rewrite runnables in Stream & Return Observables</li>
+      </ul>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Best practices & Pitfalls RxJava</h2>
+      <ul class="white strong nodisc">
+        <li><code>subsribeOn</code> and <code>observeOn</code></li>
+        <li>Back pressure</li>
+        <li>Debugging</li>
+        <li>Using with legacy code</li>
+        <li><code>Observable.create()</code></li>
+      </ul>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2><span class="color-deeporange300">Completable</span><span class="color-indigo300">Future</span>
+      </h2>
+      <ul class="white strong nodisc">
+        <li>Managing SLAs : Circuit breaker, Hystrix ?</li>
+        <li>Benchmarking Behavior</li>
       </ul>
     </section>
 
@@ -852,6 +869,9 @@ subscribe.dispose();
     </section>
 
     <section class="center" data-state="background-furets">
+      <h2>Slides & Examples</h2>
+      <a class="github" href="https://github.com/lesfurets/lf-reactive" target="_blank">https://github.com/lesfurets/lf-reactive</a>
+      <br><br>
       <h2>Open Source @ Lesfurets</h2>
       <a class="github" href="https://github.com/lesfurets" target="_blank">https://github.com/lesfurets</a>
     </section>

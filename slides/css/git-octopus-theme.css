@@ -91,6 +91,15 @@ html.background-furets .reveal:not(.overview) .backgrounds {
     background-repeat: no-repeat;
 }
 
+html.background-grenoble .reveal:not(.overview) .backgrounds {
+    background-color: #222;
+    background-size: cover;
+    background-image: url("../img/grenoble.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: saturate(.5) brightness(.5);
+}
+
 html.background-marathon .reveal:not(.overview) .backgrounds {
     background-color: #222;
     background-image: url("../img/section/marathon.jpeg");
