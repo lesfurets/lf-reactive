@@ -41,6 +41,11 @@ public class TestRxPublisher {
         System.out.println("WARN " + message);
     }
 
+    void warn(String message, Throwable t){
+        System.out.println("WARN " + message);
+        t.printStackTrace();
+    }
+
     @Test
     public void testPublisher() throws Exception {
 
@@ -59,11 +64,10 @@ public class TestRxPublisher {
                         }).subscribeOn(scheduler)
                                 .timeout(1000, TimeUnit.MILLISECONDS, Schedulers.computation())
                                 .onErrorReturn(throwable -> {
-                                    warn("Error " + throwable);
-                                    throwable.printStackTrace();
+                                    warn("Error " + throwable.getMessage(), throwable);
                                     return q;
                                 })
-                        , false, 10, 5)
+                        , false, 10, 1)
                 .subscribeWith(subscriber);
 
         AtomicInteger a = new AtomicInteger();

@@ -703,20 +703,19 @@ Scheduler scheduler = Schedulers.from(executor);
 
 PublishProcessor&lt;QuoteResult&gt; processor = PublishProcessor.create();
 ExecutorSubscriber&lt;QuoteResult&gt; subscriber = new ExecutorSubscriber<>(executor);
-processor
+processor<span class="fragment" data-fragment-index="4">
         .onBackpressureDrop(quote -> warn("Drop " + quote.getOfferId()))
-        .observeOn(Schedulers.computation(), false, 5)
+        .observeOn(Schedulers.computation(), false, 5)</span><span class="fragment" data-fragment-index="3">
         .flatMap(q -> Flowable.fromCallable(() -> {
                     runQuote(q);
                     return q;
-                }).subscribeOn(scheduler)
+                })</span><span class="fragment" data-fragment-index="1">.subscribeOn(scheduler)</span><span class="fragment" data-fragment-index="2">
                         .timeout(1000, MILLISECONDS, Schedulers.computation())
                         .onErrorReturn(throwable -> {
-                            warn("Error " + throwable);
-                            throwable.printStackTrace();
+                            warn("Error " + throwable.getMessage(), throwable);
                             return q;
-                        })
-                , false, 10, 5)
+                        })</span>
+                <span class="fragment" data-fragment-index="3">, false, 10, 1)</span>
         .subscribeWith(subscriber);
 ...
 processor.onNext(new QuoteRequest());
