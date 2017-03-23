@@ -3,6 +3,8 @@
  */
 package com.lesfurets.reactive;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -33,8 +35,9 @@ public class TestRxPublisher {
         }
     };
 
-    void runQuote(QuoteRequest q) throws Exception {
+    QuoteRequest receiveQuote(QuoteRequest q) throws Exception {
         consumer.accept(q);
+        return q;
     }
 
     void warn(String message){
@@ -51,23 +54,17 @@ public class TestRxPublisher {
 
         PublishProcessor<QuoteRequest> processor = PublishProcessor.create();
 
-        Executors.newFixedThreadPool(10);
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(100, 100, 0L, MILLISECONDS, new LinkedBlockingQueue<>());
         ExecutorSubscriber<QuoteRequest> subscriber = new ExecutorSubscriber<>(executor);
         Scheduler scheduler = Schedulers.from(executor);
         processor
                 .onBackpressureDrop(quote -> warn("Drop " + quote.getOfferId()))
                 .observeOn(Schedulers.computation(), false, 5)
-                .flatMap(q -> Flowable.fromCallable(() -> {
-                            runQuote(q);
-                            return q;
-                        }).subscribeOn(scheduler)
-                                .timeout(1000, TimeUnit.MILLISECONDS, Schedulers.computation())
-                                .onErrorReturn(throwable -> {
-                                    warn("Error " + throwable.getMessage(), throwable);
-                                    return q;
-                                })
-                        , false, 10, 1)
+                .flatMap(q -> Flowable.fromCallable(() -> receiveQuote(q))
+                                .subscribeOn(scheduler)
+                                .timeout(1000, MILLISECONDS, Schedulers.computation())
+                                .onErrorReturn(throwable -> handleError(q, throwable))
+                        , false, 100, 1)
                 .subscribeWith(subscriber);
 
         AtomicInteger a = new AtomicInteger();
@@ -91,9 +88,14 @@ public class TestRxPublisher {
 
     }
 
+    private QuoteRequest handleError(QuoteRequest q, Throwable throwable) {
+        warn("Error " + throwable.getMessage(), throwable);
+        return q;
+    }
+
     public static class ExecutorSubscriber<T> implements Subscriber<T> {
 
-
+        AtomicInteger c = new AtomicInteger(0);
 
         public ExecutorSubscriber(ThreadPoolExecutor executor) {
             this.e = executor;
@@ -109,6 +111,7 @@ public class TestRxPublisher {
         public void onNext(T o) {
             //            s.request(1);
             System.out.println("FINISH: " + o +" - "+ Thread.currentThread().getName());
+            c.decrementAndGet();
         }
 
         @Override
@@ -126,8 +129,11 @@ public class TestRxPublisher {
         ThreadPoolExecutor e;
 
         public void requestIfNeeded() {
-            if (e.getActiveCount() < 10)
+            if (c.get() < 10) {
+                System.out.println("THREAD C " + e.getActiveCount());
+                c.incrementAndGet();
                 s.request(1);
+            }
         }
     }
 }

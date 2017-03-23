@@ -683,41 +683,56 @@ List&lt;QuoteResult&gt; quotes = quoteForAllProviders(new QuoteRequest()).blocki
       </div>
     </section>
 
-<!--    <section class="center" data-background="#333">
-      <h2>RxJava Observables</h2>
-        <p>Observable: 0..N flows, no backpressure
-          <br/>Flowable : 0..N flows, supporting Reactive-Streams and backpressure
-          <br/>Single: a flow of exactly 1 item or an error
-          <br/>Completable: a flow without items but only a completion or error signal
-          <br/>Maybe: a flow with no items, exactly one item or an error
-        </p>
-    </section>-->
-
     <section class="center" data-background="#333">
       <h2>Orchestrator RxJava Processor</h2>
       <div class="code-wrapper smaller">
       <pre class="prettyprint" style="background-color: transparent">
           <code class="code language-java" data-trim data-noescape>
-Executors.newFixedThreadPool(10);
+/* Prepare resources per WS Endpoint */
+ExecutorService executor = Executors.newFixedThreadPool(20);
 Scheduler scheduler = Schedulers.from(executor);
 
 PublishProcessor&lt;QuoteResult&gt; processor = PublishProcessor.create();
 ExecutorSubscriber&lt;QuoteResult&gt; subscriber = new ExecutorSubscriber<>(executor);
-processor<span class="fragment" data-fragment-index="4">
-        .onBackpressureDrop(quote -> warn("Drop " + quote.getOfferId()))
-        .observeOn(Schedulers.computation(), false, 5)</span><span class="fragment" data-fragment-index="3">
-        .flatMap(q -> Flowable.fromCallable(() -> {
-                    runQuote(q);
-                    return q;
-                })</span><span class="fragment" data-fragment-index="1">.subscribeOn(scheduler)</span><span class="fragment" data-fragment-index="2">
-                        .timeout(1000, MILLISECONDS, Schedulers.computation())
-                        .onErrorReturn(throwable -> {
-                            warn("Error " + throwable.getMessage(), throwable);
-                            return q;
-                        })</span>
-                <span class="fragment" data-fragment-index="3">, false, 10, 1)</span>
+processor
+        <span class="fragment" data-fragment-index="6">.onBackpressureDrop(quote -> warn("Drop " + quote.getOfferId()))
+        .observeOn(Schedulers.computation(), false, 5)</span>
+        <span class="fragment" data-fragment-index="5">.flatMap(q -> </span><span class="fragment" data-fragment-index="1">Flowable.fromCallable(() -> receiveQuote(q))</span>
+                        <span class="fragment" data-fragment-index="2">.subscribeOn(scheduler)</span>
+                        <span class="fragment" data-fragment-index="3">.timeout(1000, MILLISECONDS, Schedulers.computation())</span>
+                        <span class="fragment" data-fragment-index="4">.onErrorReturn(throwable -> handleError(q, throwable))</span>
+            <span class="fragment" data-fragment-index="5">, false, 10, 1)</span>
         .subscribeWith(subscriber);
-...
+<span class="fragment" data-fragment-index="6">/* Push requests to processor */
+processor.onNext(new QuoteRequest());
+subscriber.requestIfNeeded();
+waitForCompletion();</span>
+          </code>
+      </pre>
+      </div>
+    </section>
+
+<!--
+    <section class="center" data-background="#333">
+      <h2>Orchestrator RxJava Processor</h2>
+      <div class="code-wrapper smaller">
+      <pre class="prettyprint" style="background-color: transparent">
+          <code class="code language-java" data-trim data-noescape>
+ExecutorService executor = Executors.newFixedThreadPool(20);
+Scheduler scheduler = Schedulers.from(executor);
+
+PublishProcessor&lt;QuoteResult&gt; processor = PublishProcessor.create();
+ExecutorSubscriber&lt;QuoteResult&gt; subscriber = new ExecutorSubscriber<>(executor);
+processor
+        .onBackpressureDrop(quote -> warn("Drop " + quote.getOfferId()))
+        .observeOn(Schedulers.computation(), false, 5)
+        .flatMap(q -> Flowable.fromCallable(() -> receiveQuote(q))
+                        .subscribeOn(scheduler)
+                        .timeout(1000, MILLISECONDS, Schedulers.computation())
+                        .onErrorReturn(throwable -> handleError(q, throwable))
+                , false, 20, 1)
+        .subscribeWith(subscriber);
+/*...*/
 processor.onNext(new QuoteRequest());
 subscriber.requestIfNeeded();
 waitForCompletion();
@@ -725,6 +740,7 @@ waitForCompletion();
       </pre>
       </div>
     </section>
+-->
 
     <section class="center" data-background="#333">
       <h2>Orchestrator RxJava Subscriber</h2>
@@ -734,11 +750,18 @@ waitForCompletion();
 class ExecutorSubscriber&lt;T&gt; implements Subscriber&lt;T&gt; {
 
   Subscription s;
-  ThreadPoolExecutor e;
+  AtomicInteger c = new AtomicInteger(0);
+
+  @Override
+  public void onNext(T o) {
+      c.decrementAndGet();
+  }
 
   public void requestIfNeeded() {
-      if (e.getActiveCount() < 10)
+      if (c.get() < 10)
+          c.incrementAndGet();
           s.request(1);
+      }
   }
           </code>
       </pre>
@@ -752,15 +775,6 @@ class ExecutorSubscriber&lt;T&gt; implements Subscriber&lt;T&gt; {
         <li>Scalable thread pools</li>
         <li>Common thread pool with scaling</li>
         <li>Prioritizing different types of calls</li>
-      </ul>
-    </section>
-
-    <section class="center" data-background="#333">
-      <h2>Testing & Benchmarking</h2>
-      <ul class="white strong nodisc">
-        <li><code>TestSubscriber</code></li>
-        <li><span class="color-indigo300">Reactivity Test Scenarios</span>: Long-term stress, short bursts</li>
-        <li><span class="color-indigo300">Execution performance</span>: <a href="https://akarnokd.blogspot.fr/">https://akarnokd.blogspot.fr/</a></li>
       </ul>
     </section>
 
@@ -790,6 +804,15 @@ class ExecutorSubscriber&lt;T&gt; implements Subscriber&lt;T&gt; {
       <ul class="white strong nodisc">
         <li>Managing SLAs : Circuit breaker, Hystrix ?</li>
         <li>Benchmarking Behavior</li>
+      </ul>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Testing & Benchmarking</h2>
+      <ul class="white strong nodisc">
+        <li>RxJava <code>TestSubscriber</code></li>
+        <li><span class="color-indigo300">Reactivity Test Scenarios</span>: Long-term stress, short bursts</li>
+        <li><span class="color-indigo300">Execution performance</span>: <a href="https://akarnokd.blogspot.fr/">https://akarnokd.blogspot.fr/</a></li>
       </ul>
     </section>
 
