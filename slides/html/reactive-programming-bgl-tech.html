@@ -37,19 +37,18 @@
   <a class="github" href="https://github.com/ozangunalp" target="_blank">https://github.com/ozangunalp</a>
   <a style="margin-right: 10px;" class="twitter" href="https://twitter.com/ozangunalp" target="_blank">@ozangunalp</a>
   <!--<img style="width:50px;vertical-align:middle;padding-left:25px" src="../img/theodo-logo-medium.png">-->
-  <span style="font-family:arial;font-weight:bold;font-size:25px;vertical-align:middle">Snowcamp</span>
+  <span class="flushright" style="font-family:arial;font-weight:bold;font-size:25px;vertical-align:middle">META - BGL Tech Conference</span>
 </div>
 <div class="reveal">
   <div class="slides">
     <!-- SECTION - INTRO -->
 
     <section class="flushright" data-state="background-furets">
-      <h1>Reactive programming</h1>
-      <h2>for service orchestration<br>on JVM</h2>
+      <h1>From Legacy to Reactive</h1>
       <h3>Ozan Gunalp</h3>
     </section>
 
-    <section class="flushleft" data-state="background-grenoble">
+    <section class="flushleft" data-state="background-furets">
       <h3 style="color:#f07d00">Ozan GUNALP</h3>
       <ul class="flushright nodisc">
         <li>
@@ -71,8 +70,8 @@
       <h2>LesFurets.com</h2>
       <img style="width: 75%;background-color: white" src="../img/PPS_LesFurets_com.png">
       <!--<ul class="white nodisc">-->
-        <!--<li>Insurance comparison</li>-->
-        <!--<li>We call web-services of more than 25 insurers to have the best prices.</li>-->
+      <!--<li>Insurance comparison</li>-->
+      <!--<li>We call web-services of more than 25 insurers to have the best prices.</li>-->
       <!--</ul>-->
     </section>
 
@@ -111,14 +110,14 @@
       <h2>Distributed Computing Fallacies</h2>
       <div class="flushleft">
         <ul class="white strong nodisc">
-            <li>The network is reliable. <strong>NOT</strong></li>
-            <li>Latency is zero. <strong>NOT</strong></li>
-            <li>...</li>
-            <li>There is one administrator. <strong>NOT</strong></li>
+          <li>The network is reliable. <strong>NOT</strong></li>
+          <li>Latency is zero. <strong>NOT</strong></li>
+          <li>...</li>
+          <li>There is one administrator. <strong>NOT</strong></li>
         </ul>
       </div>
       <aside class="notes">
-         Illusions de l'informatique
+        Illusions de l'informatique
         <li>1.	The network is reliable</li>
         <li>2.	Latency is zero</li>
         <li>3.	Bandwidth is infinite</li>
@@ -183,7 +182,6 @@ private Map doQuotation(ResultatTarifications resultat, Control control, List pr
     <section class="center" data-background="#333">
       <h2>How do we scale?</h2>
       <img style="width: 75%;background-color: white" src="../img/sequence_diagram_thread_busy.jpg">
-      <p class="strong">Thread pool size per endpoint : 2</p>
     </section>
 
     <section class="center" data-background="#333">
@@ -202,14 +200,14 @@ if (executor.getActiveCount() >= POOL_SIZE) {
     <section class="center" data-background="#333">
       <h2>Underlying problems</h2>
       <ul class="white nodisc">
-        <li><span class="strong color-deeporange300">Scalability</span> : + resources &rarr; + performance</li>
-        <li><span class="strong color-deeporange300">Resilience</span> : SLA management</li>
-        <li><span class="strong color-deeporange300">Maintainability</span> : Clean code</li>
+        <li><span class="strong color-indigo300">Scalability</span> : + resources &rarr; + performance</li>
+        <li><span class="strong color-indigo300">Resilience</span> : SLA management</li>
+        <li><span class="strong color-indigo300">Maintainability</span> : Clean code</li>
       </ul>
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Asynchronous execution</h2>
+      <h2>Concurrent Programming</h2>
       <ul class="nodisc">
         <li><span class="strong color-indigo300">Scalability</span> : distribute tasks to multiple resources</li>
         <li><span class="strong color-indigo300">Resilience</span> : isolation of errors</li>
@@ -219,14 +217,14 @@ if (executor.getActiveCount() >= POOL_SIZE) {
     <section class="center" data-background="#333">
       <h2>Mastering concurrency is difficult.</h2>
       <div class="flushleft" style="position: absolute">
-      <ul class="nodisc strong small">
-        <li>Thread pool management</li>
-        <li>Access to shared state (deadlocks, race conditions)</li>
-        <li>Error handling (i.e. timeouts)</li>
-        <li>Composing / coordinating async tasks</li>
-        <li>Throughput management</li>
-        <li>...</li>
-      </ul>
+        <ul class="nodisc strong small">
+          <li>Thread pool management</li>
+          <li>Access to shared state (deadlocks, race conditions)</li>
+          <li>Error handling (i.e. timeouts)</li>
+          <li>Composing / coordinating async tasks</li>
+          <li>Throughput management</li>
+          <li>...</li>
+        </ul>
       </div>
       <div class="flushright" style="position: relative">
         <img style="width: 25%;background-color: white" src="../img/java_concurrency.jpg">
@@ -280,20 +278,6 @@ String content = http.get();
       <p class="strong color-indigo300">What if workers can't keep up with events?<br>
         <span class="color-deeporange300">java.lang.OutOfMemoryError</span>
       </p>
-    </section>
-
-    <section class="center small" data-background="#333" data-markdown>
-      <div style="align-content: center;">
-        <script type="text/template">
-          ||ExecutorService |Message Queues|
-          |:--|--|--|--|--|
-          |Thread management|+|+|
-          |Shared state|-|-|
-          |Composability|-|~|
-          |Error handling|-|-|
-          |Throughput management|-|~|
-        </script>
-      </div>
     </section>
 
     <section class="center" data-background="#333">
@@ -352,7 +336,7 @@ httpAsyncGet("http://www.lesfurets.com", ar -> {
 
     <section class="center" data-background="#333">
       <h2>CompletableFuture</h2>
-        <!--<li>Represents the result of an action that may, or may not, have occurred yet.</li>-->
+      <!--<li>Represents the result of an action that may, or may not, have occurred yet.</li>-->
       <div class="code-wrapper">
       <pre class="prettyprint" style="background: none">
           <code class="code language-java" data-trim data-noescape>
@@ -373,22 +357,6 @@ CompletableFuture.supplyAsync(() -> {
       <p class="strong color-deeporange300">Error handling</p>
     </section>
 
-    <section class="small" data-background="#333" data-markdown>
-      <div class="flushleft">
-        <script type="text/template">
-          ||ExecutorService |Message Queues|Event Loops|CompletableFuture|
-          |:--|--|--|--|--|
-          |Thread management|+|+|~|+|
-          |Shared state|-|-|~|+|
-          |Composability|-|~|-|+|
-          |Error handling|-|-|~|-|
-          |Throughput management|-|~|-|-|
-        </script>
-      </div>
-    </section>
-
-
-
     <section class="center" data-background="#333">
       <h2>
         <span class="color-indigo300">Reactive</span>
@@ -397,16 +365,18 @@ CompletableFuture.supplyAsync(() -> {
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Streams <span class="color-deeporange300">!=</span> Collections</h2>
+      <h2>Streams <span class="white">!=</span> Collections</h2>
       <p>
-        <span class="strong">Collection</span><br>
-        <span class="color-indigo300 strong">Definition of data</span> : Iterable group of items,
-        <br>definite size
+        <span class="strong color-indigo300">Stream</span>
+        <br/>Definition of work
+        <br/>Operations on group of items
+        <br>Unbounded size
       </p>
       <p>
-        <span class="strong">Stream</span><br>
-        <span class="color-indigo300 strong">Definition of work</span> : Operations on group of items,
-        <br>unbounded size
+        <span class="strong color-indigo300">Collection</span>
+        <br/>Definition of data
+        <br/>Iterable group of items
+        <br/>Definite size
       </p>
     </section>
 
@@ -426,8 +396,11 @@ List&lt;QuoteResult&gt; resultList = LongStream.range(0, 11)
       </pre>
       </div>
       <p class="strong">Functional programming &rarr; <br>
-          immutability &rarr;<br>
+        immutability &rarr;<br>
         <span class="color-indigo300">no more shared state</span>
+      </p>
+      <p class="strong fragment">
+        IEnumerable
       </p>
     </section>
 
@@ -487,11 +460,12 @@ public interface Subscription {
     <section class="center" data-background="#333">
       <h2>Reactive Streams</h2>
       <ul class="nodisc strong">
-        <li>RxJava2</li>
+        <li>RxJava</li>
         <li>Spring Reactor</li>
         <li>Vert.x</li>
         <li>Akka Streams</li>
         <li>...</li>
+        <li>Rx.NET</li>
       </ul>
     </section>
 
@@ -499,6 +473,9 @@ public interface Subscription {
       <h2>RxJava</h2>
       <p class="strong">
         Observables + Operators + Scheduling
+      </p>
+      <p class="strong fragment">
+        Rx.NET = Observables + LINQ + Schedulers
       </p>
     </section>
 
@@ -522,7 +499,7 @@ Observable.just(1,2,3,4);
           </code>
       </pre>
       </div>
-      <p class="strong">Event / Data / Task</p>
+      <p class="strong">Flow of Event / Data / Task</p>
     </section>
 
     <section class="center" data-background="#333">
@@ -545,30 +522,16 @@ Observable.fromIterable(providers)
       <pre class="prettyprint" style="background: none">
           <code class="code language-java" data-trim data-noescape>
 Observable.fromIterable(providers)
-  .subscribeOn(Schedulers.io())
+  .observeOn(Schedulers.io())
   .map(p -> p.getQuote())
   .filter(q -> !q.hasError())
-  .observeOn(Schedulers.from(executorService))
+  .subscribeOn(Schedulers.from(executorService))
   .subscribe(System.out::println);
           </code>
       </pre>
       </div>
       <p  class="strong"><code>subscribeOn</code>: on which thread events are <code>created</code>.</p>
       <p class="strong"><code>observeOn</code>: on which thread events are observed.</p>
-    </section>
-
-    <section class="small" data-background="#333" data-markdown>
-      <div class="flushleft">
-        <script type="text/template">
-          ||ExecutorService |Message Queues|Event Loops|CompletableFuture|RxJava2|
-          |:--|--|--|--|--|
-          |Thread management|+|+|~|+|+|
-          |Shared state|-|-|~|+|+|
-          |Composability|-|~|-|+|+|
-          |Error handling|-|-|~|-|+|
-          |Throughput management|-|~|-|-|+|
-        </script>
-      </div>
     </section>
 
     <section class="center" data-background="#333">
@@ -607,49 +570,27 @@ private Map doQuotation(ResultatTarifications resultat, Control control, List pr
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Orchestrator parallel stream</h2>
+      <h2>Requirements</h2>
+      <ul class="white nodisc">
+        <li class="strong">Better resource management</li>
+        <li class="strong">Easier SLA enforcement</li>
+        <li class="strong">Cleaner code</li>
+      </ul>
+    </section>
 
-      <div class="code-wrapper smaller">
-      <pre class="prettyprint" style="background: none">
+    <section class="center" data-background="#333">
+      <h2>Quotation Model</h2>
+      <div class="code-wrapper">
+         <pre class="prettyprint" style="background: none">
           <code class="code language-java" data-trim data-noescape>
-QuoteRequest q = ..
-ForkJoinPool forkJoinPool = new ForkJoinPool(10);
+Provider provider;
 
-ForkJoinTask&lt;List&lt;QuoteResult&gt;&gt; submit = forkJoinPool.submit(() ->
-    providers.stream().parallel()
-            // map in
-            .map(p -> p.doReceiveQuote(q))
-            // map out
-    )
-    .collect(Collectors.toList())
-);
+QuoteRequest quoteRequest;
 
-List&lt;QuoteResult&gt; results = submit.get();
+QuoteResult result = provider.doReceiveQuote(quoteRequest);
           </code>
-      </pre>
+         </pre>
       </div>
-<!--      <div class="code-wrapper smaller">
-      <pre class="prettyprint" style="background: none">
-          <code class="code language-java" data-trim data-noescape>
-            List&lt;QuoteResult&gt; results = submit.get();
-
-            ForkJoinTask&lt;List&lt;QuoteResult&gt;&gt; submit = forkJoinPool
-            .submit(() -> LongStream.range(0, 11).parallel()
-            .boxed()
-            .map(l -> new QuoteRequest(l, 0.0))
-            .flatMap(q -> providers.stream()
-                .map(p -> new QuoteContext(p, q))
-            )
-            .map(q -> q.setQ(q.getP().mapRequest(q.getQ())))
-            .map(q -> q.setResult(q.getP().doReceiveQuote(q.getQ())))
-            .map(q -> q.setResult(q.getP().mapResult(q.getResult())))
-            .map(QuoteContext::getResult)
-            .collect(Collectors.toList()));
-        List&lt;QuoteResult&gt; results = submit.get();
-          </code>
-      </pre>
-      </div>-->
-
     </section>
 
     <section class="center" data-background="#333">
@@ -671,6 +612,7 @@ private CompletableFuture&lt;QuoteResult&gt; quoteFromProvider(QuoteRequest q, P
 
     <section class="center" data-background="#333">
       <h2>Orchestrator CompletableFuture</h2>
+      <p>Scatter</p>
       <div class="code-wrapper smaller">
       <pre class="prettyprint" style="background: none">
           <code class="code language-java" data-trim data-noescape>
@@ -681,6 +623,7 @@ List&lt;CompletableFuture&lt;QuoteResult&gt;&gt; futures = providers.stream()
           </code>
       </pre>
       </div>
+      <p>Gather</p>
       <div class="code-wrapper smaller">
       <pre class="prettyprint" style="background: none">
           <code class="code language-java" data-trim data-noescape>
@@ -717,6 +660,7 @@ private Observable&lt;QuoteResult&gt; quoteFromProvider(QuoteRequest q, Provider
 
     <section class="center" data-background="#333">
       <h2>Orchestrator RxJava Observable</h2>
+      <p>Scatter</p>
       <div class="code-wrapper smaller">
       <pre class="prettyprint" style="background: none">
           <code class="code language-java" data-trim data-noescape>
@@ -729,6 +673,7 @@ private Observable&lt;List&lt;QuoteResult&gt;&gt; quoteForAllProviders(QuoteRequ
           </code>
       </pre>
       </div>
+      <p>Gather</p>
       <div class="code-wrapper smaller">
       <pre class="prettyprint" style="background: none">
           <code class="code language-java" data-trim data-noescape>
@@ -738,33 +683,18 @@ List&lt;QuoteResult&gt; quotes = quoteForAllProviders(new QuoteRequest()).blocki
       </div>
     </section>
 
-    <section class="center" data-background="#333">
-      <h2>Orchestrator RxJava2 Flowable</h2>
-      <div class="code-wrapper smaller">
-      <pre class="prettyprint" style="background: none">
-          <code class="code language-java" data-trim data-noescape>
-private Flowable&lt;List&lt;QuoteResult&gt;&gt; quoteForAllProviders(QuoteRequest q) {
-  return Flowable.fromIterable(providers)
-      .flatMap(p -> Flowable.just(q)
-          .onBackpressureBuffer(1, () -> warn("Buffer Overflow"),
-              BackpressureOverflowStrategy.DROP_OLDEST)
-          .observeOn(Schedulers.from(computation))
-          .map(p::mapRequest)
-          .map(p::doReceiveQuote)
-          .map(p::mapResult)
-          .timeout(getTimeout(), TimeUnit.MILLISECONDS,
-              Flowable.just(new QuoteResult(new TimeoutException("Timeout"))))
-          .subscribeOn(Schedulers.from(executorService)))
-      .toList()
-      .toFlowable();
-}
-          </code>
-      </pre>
-      </div>
-    </section>
+<!--    <section class="center" data-background="#333">
+      <h2>RxJava Observables</h2>
+        <p>Observable: 0..N flows, no backpressure
+          <br/>Flowable : 0..N flows, supporting Reactive-Streams and backpressure
+          <br/>Single: a flow of exactly 1 item or an error
+          <br/>Completable: a flow without items but only a completion or error signal
+          <br/>Maybe: a flow with no items, exactly one item or an error
+        </p>
+    </section>-->
 
     <section class="center" data-background="#333">
-      <h2>Orchestrator RxJava2 Processor</h2>
+      <h2>Orchestrator RxJava Processor</h2>
       <div class="code-wrapper smaller">
       <pre class="prettyprint" style="background-color: transparent">
           <code class="code language-java" data-trim data-noescape>
@@ -798,7 +728,7 @@ waitForCompletion();
     </section>
 
     <section class="center" data-background="#333">
-      <h2>Orchestrator RxJava2 Subscriber</h2>
+      <h2>Orchestrator RxJava Subscriber</h2>
       <div class="code-wrapper smaller">
       <pre class="prettyprint" style="background-color: transparent">
           <code class="code language-java" data-trim data-noescape>
@@ -856,7 +786,7 @@ class ExecutorSubscriber&lt;T&gt; implements Subscriber&lt;T&gt; {
     </section>
 
     <section class="center" data-background="#333">
-      <h2><span class="color-deeporange300">Completable</span><span class="color-indigo300">Future</span>
+      <h2>Completable<span class="color-indigo300">Future</span>
       </h2>
       <ul class="white strong nodisc">
         <li>Managing SLAs : Circuit breaker, Hystrix ?</li>
@@ -921,6 +851,7 @@ class ExecutorSubscriber&lt;T&gt; implements Subscriber&lt;T&gt; {
                 }
             }
         },
+        slideNumber: true,
 
 
         //theme: 'lesfurets', // available themes are in /css/theme
