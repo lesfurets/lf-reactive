@@ -703,7 +703,7 @@ processor
                         <span class="fragment" data-fragment-index="4">.onErrorReturn(throwable -> handleError(q, throwable))</span>
             <span class="fragment" data-fragment-index="5">, false, 10, 1)</span>
         .subscribeWith(subscriber);
-<span class="fragment" data-fragment-index="6">/* Push requests to processor */
+<span class="fragment" data-fragment-index="7">/* Push requests to processor */
 processor.onNext(new QuoteRequest());
 subscriber.requestIfNeeded();
 waitForCompletion();</span>
@@ -873,8 +873,6 @@ class ExecutorSubscriber&lt;T&gt; implements Subscriber&lt;T&gt; {
                 }
             }
         },
-        slideNumber: true,
-
 
         //theme: 'lesfurets', // available themes are in /css/theme
         transition: Reveal.getQueryHash().transition || 'linear', // default/cube/page/concave/zoom/linear/fade/none
