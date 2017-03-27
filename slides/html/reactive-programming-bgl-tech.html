@@ -522,11 +522,13 @@ Observable.fromIterable(providers)
       <pre class="prettyprint" style="background: none">
           <code class="code language-java" data-trim data-noescape>
 Observable.fromIterable(providers)
+  .subscribeOn(Schedulers.computation())
+  .doOnNext(p -> logStart(p)) // computation
   .observeOn(Schedulers.io())
-  .map(p -> p.getQuote())
-  .filter(q -> !q.hasError())
-  .subscribeOn(Schedulers.from(executorService))
-  .subscribe(System.out::println);
+  .map(p -> p.getQuote()) // io
+  .observeOn(Schedulers.from(threadPool))
+  .filter(q -> !q.hasError()) // threadPool
+  .subscribe(System.out::println); // threadPool
           </code>
       </pre>
       </div>
