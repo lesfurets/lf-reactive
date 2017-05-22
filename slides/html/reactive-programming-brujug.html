@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Reactive programming for service orchestration on JVM</title>
+  <meta name="description" content="Reactive programming for service orchestration on JVM">
+  <meta name="author" content="Ozan Gunalp">
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="../bower_components/reveal.js/css/reveal.css">
+  <link rel="stylesheet" href="../bower_components/reveal.js/lib/css/zenburn.css">
+  <link rel="stylesheet" href="../css/lesfurets-theme.css" id="theme">
+  <link rel="stylesheet" href="../css/git-octopus-theme.css" id="octopus-theme">
+  <link rel="stylesheet" href="../css/code-jooq-theme.css" id="jooq-theme">
+  <script>
+      if (window.location.search.match(/print-pdf/gi)) {
+          var link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.type = 'text/css';
+          link.href = '../css/print/pdf.css';
+          document.getElementsByTagName('head')[0].appendChild(link);
+      }
+  </script>
+  <!--[if lt IE 9]>
+  <script src="../bower_components/reveal.js/lib/js/html5shiv.js"></script><![endif]-->
+  <link rel="stylesheet" type="text/css" href="../js/sunburst.css">
+  <!--<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?autoload=true&amp;skin=sunburst&amp;lang=java" defer=""></script>-->
+</head>
+<body>
+<div id="footer" class="footer show">
+  <a href="https://www.lesfurets.com" target="_blank">
+    <img class="logo" src="../img/logo_lesfurets_885x128_no_back.png">
+  </a>
+  <a class="github" href="https://github.com/lesfurets" target="_blank">https://github.com/lesfurets</a>
+  <a class="twitter" href="https://twitter.com/BeastieFurets" target="_blank">@BeastieFurets</a>
+  <a class="github" href="https://github.com/ozangunalp" target="_blank">https://github.com/ozangunalp</a>
+  <a style="margin-right: 10px;" class="twitter" href="https://twitter.com/ozangunalp" target="_blank">@ozangunalp</a>
+  <!--<img style="width:50px;vertical-align:middle;padding-left:25px" src="../img/theodo-logo-medium.png">-->
+  <span class="flushright" style="font-family:arial;font-weight:bold;font-size:25px;vertical-align:middle">BruJUG</span>
+</div>
+<div class="reveal">
+  <div class="slides">
+    <!-- SECTION - INTRO -->
+
+    <section class="flushright" data-state="background-furets">
+      <h1>From Legacy to Reactive</h1>
+      <h3>Ozan Gunalp</h3>
+    </section>
+
+    <section class="flushleft" data-state="background-furets">
+      <h3 style="color:#f07d00">Ozan GUNALP</h3>
+      <ul class="flushright nodisc">
+        <li>
+          <a style="color:white" href="https://twitter.com/ozangunalp">twitter.com/ozangunalp</a>
+        </li>
+        <li>
+          <a style="color:white" href="https://github.com/ozangunalp">github.com/ozangunalp</a>
+        </li>
+      </ul>
+      <h3 style="color:#f07d00">Contributors</h3>
+      <ul class="flushleft small nodisc">
+        <li>Gilles Di Guglielmo</li>
+      </ul>
+    </section>
+
+    <!-- SECTION - CONTEXT -->
+
+    <section class="center" data-background="#333">
+      <h2>LesFurets.com</h2>
+      <img style="width: 75%;background-color: white" src="../img/PPS_LesFurets_com.png">
+      <!--<ul class="white nodisc">-->
+      <!--<li>Insurance comparison</li>-->
+      <!--<li>We call web-services of more than 25 insurers to have the best prices.</li>-->
+      <!--</ul>-->
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>LesFurets.com</h2>
+      <ul class="white strong nodisc">
+        <li>Apache Tomcat Blocking IO</li>
+        <li>GWT RPC on Servlet</li>
+      </ul>
+      <p class="strong">We are far from being reactive.</p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Reactive Hype</h2>
+      <img style="width: 75%;background-color: white" src="../img/reactive/hype_cycle.png">
+      <p class="strong">Let's test this!</p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Service Orchestrator</h2>
+      <img style="width: 85%;background-color: white" src="../img/scatter_gather.jpg">
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Service Orchestrator</h2>
+      <img style="width: 75%;background-color: white" src="../img/sequence_diagram_one_client.jpg">
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Service Orchestrator</h2>
+      <img style="width: 75%;background-color: white" src="../img/sequence_diagram_two_client.jpg">
+    </section>
+
+
+    <section class="center" data-background="#333">
+      <h2>Distributed Computing Fallacies</h2>
+      <div class="flushleft">
+        <ul class="white strong nodisc">
+          <li>The network is reliable. <strong>NOT</strong></li>
+          <li>Latency is zero. <strong>NOT</strong></li>
+          <li>...</li>
+          <li>There is one administrator. <strong>NOT</strong></li>
+        </ul>
+      </div>
+      <aside class="notes">
+        Illusions de l'informatique
+        <li>1.	The network is reliable</li>
+        <li>2.	Latency is zero</li>
+        <li>3.	Bandwidth is infinite</li>
+        <li>4.	The network is secure</li>
+        <li>5.	Topology doesn't change</li>
+        <li>6.	There is one administrator</li>
+        <li>7.	Transport cost is zero</li>
+        <li>8.	The network is homogeneous</li>
+      </aside>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Service calls fail, a lot.</h2>
+      <img style="width: 75%;background-color: white" src="../img/reactive/tessera.png">
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Time over</h2>
+      <img style="width: 75%;background-color: white" src="../img/sequence_diagram_time_over.jpg">
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Being reactive, on Slack</h2>
+      <img style="width: 75%;background-color: white" src="../img/reactive/Slack_-_LesFurets.png">
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Clean-er code ?</h2>
+      <div class="code-wrapper smaller">
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+private Map doQuotation(ResultatTarifications resultat, Control control, List products) {
+    //...
+    final List runnables = new ArrayList<>();
+    try {
+        prepareRunnables(runnables, projet, resultat, products, control, ...);
+        long timeOut = control.getConnectionTimeout();
+        final long startTime = System.currentTimeMillis();
+        for (OrchestratorRunnable runnable : runnables) {
+            // .. mapping in, web service call, mapping out
+            executeRunnable(timeOut, startTime, runnable);
+        }
+        waitAll(startTime, getModule(), runnables, timeOut);
+        logTarificationTimer(runnables, startTime);
+        postTraitements(resultat);
+    } catch (Throwable t) {
+        LOG.error("Error occurs during tarifications " + projet.getOffreUid(), t);
+    } finally {
+        checkResultat(resultat);
+    }
+    final Map contexts = new HashMap<>();
+    for (TarificationRunnable runnable : runnables) {
+        contexts.put(runnable.getProvider(), runnable.getContext());
+    }
+    return Collections.unmodifiableMap(contexts);
+}
+          </code>
+      </pre>
+      </div>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>How do we scale?</h2>
+      <img style="width: 75%;background-color: white" src="../img/sequence_diagram_thread_busy.jpg">
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Buzzy thread pool</h2>
+      <div class="code-wrapper">
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+if (executor.getActiveCount() >= POOL_SIZE) {
+    throw new NoExecutorAvailable("ThreadPool buzy");
+}
+          </code>
+      </pre>
+      </div>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Underlying problems</h2>
+      <ul class="white nodisc">
+        <li><span class="strong color-indigo300">Scalability</span> : + resources &rarr; + performance</li>
+        <li><span class="strong color-indigo300">Resilience</span> : SLA management</li>
+        <li><span class="strong color-indigo300">Maintainability</span> : Clean code</li>
+      </ul>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Concurrent Programming</h2>
+      <ul class="nodisc">
+        <li><span class="strong color-indigo300">Scalability</span> : distribute tasks to multiple resources</li>
+        <li><span class="strong color-indigo300">Resilience</span> : isolation of errors</li>
+      </ul>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Mastering concurrency is difficult.</h2>
+      <div class="flushleft" style="position: absolute">
+        <ul class="nodisc strong small">
+          <li>Thread pool management</li>
+          <li>Access to shared state (deadlocks, race conditions)</li>
+          <li>Error handling (i.e. timeouts)</li>
+          <li>Composing / coordinating async tasks</li>
+          <li>Throughput management</li>
+          <li>...</li>
+        </ul>
+      </div>
+      <div class="flushright" style="position: relative">
+        <img style="width: 25%;background-color: white" src="../img/java_concurrency.jpg">
+      </div>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Asynchronous abstractions</h2>
+      <ul class="white strong nodisc">
+        <li>Thread pools and locks</li>
+        <li>Message queues with buffering</li>
+      </ul>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Synchronous API</h2>
+      <div class="code-wrapper">
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+public String httpBlockingGet(String url);
+          </code>
+      </pre>
+      </div>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>ExecutorService</h2>
+      <div class="code-wrapper">
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+ExecutorService executor = Executors.newCachedThreadPool();
+Future&lt;String&gt; http = executor.submit(() -> {
+  try {
+    return httpBlockingGet("http://www.lesfurets.com");
+  } catch (Exception e) {
+    e.printStackTrace();
+    return "Error :"+e.getMessage();
+  }
+});
+// blocking get
+String content = http.get();
+          </code>
+      </pre>
+      </div>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Message Queues</h2>
+      <img style="width: 75%;background-color: white" src="../img/reactive/jobqueue1.png">
+      <p class="strong">Handle changes on throughput with buffering</p>
+      <p class="strong color-indigo300">What if workers can't keep up with events?<br>
+        <span class="color-deeporange300">java.lang.OutOfMemoryError</span>
+      </p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Reactive Programming</h2>
+      <p>React to <span class="strong color-indigo300">asynchronous</span>
+        data / events<br>
+        <span class="strong color-deeporange300">+</span><br>
+        [<span class="strong color-indigo300">declarative</span> flow of data transformations]
+      </p>
+      <p><span class="strong color-deeporange300">&ne;</span><br>
+        <span class="strong">Reactive Systems</span><br>
+        Architectural design pattern for distributed systems
+      </p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Reactive abstractions</h2>
+      <ul class="white strong nodisc">
+        <li>Event loops with callbacks</li>
+        <li>Promise / Future / CompletableFuture</li>
+        <li>Reactive Streams</li>
+      </ul>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Event Loops</h2>
+      <img style="width: 75%;background-color: white" src="../img/reactive/ev-server.svg">
+      <p class="strong">Mono thread + NIO</p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Asynchronous Callback</h2>
+      <div class="code-wrapper">
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+public void httpAsyncGet(String url, Handler&lt;String&gt;);
+          </code>
+      </pre>
+      </div>
+      <div class="code-wrapper">
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+httpAsyncGet("http://www.lesfurets.com", ar -> {
+  if (ar.succeeded()) {
+    String content = ar.result();
+    // do something
+  } else {
+    Throwable e = ar.error();
+    // handle error
+  }
+});</code>
+      </pre>
+      </div>
+      <p class="strong color-deeporange300">Death by callback</p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>CompletableFuture</h2>
+      <!--<li>Represents the result of an action that may, or may not, have occurred yet.</li>-->
+      <div class="code-wrapper">
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+CompletableFuture.supplyAsync(() -> {
+  try {
+    return httpBlockingGet("http://www.lesfurets.com");
+  } catch (Exception e) {
+    return "Error :"+e.getMessage();
+  }
+}, executor)
+    .thenApply(c -> searchTitle(c))
+    .thenAccept(s -> {
+      // use title
+    });
+          </code>
+      </pre>
+      </div>
+      <p class="strong color-deeporange300">Error handling</p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>
+        <span class="color-indigo300">Reactive</span>
+        Streams
+      </h2>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Streams <span class="white">!=</span> Collections</h2>
+      <p>
+        <span class="strong color-indigo300">Stream</span>
+        <br/>Definition of work
+        <br/>Operations on group of items
+        <br>Unbounded size
+      </p>
+      <p>
+        <span class="strong color-indigo300">Collection</span>
+        <br/>Definition of data
+        <br/>Iterable group of items
+        <br/>Definite size
+      </p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Streams Java 8</h2>
+      <div class="code-wrapper">
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+List&lt;QuoteResult&gt; resultList = LongStream.range(0, 11)
+  .boxed()
+  .map(l -> new QuoteRequest(l))
+  .filter(l -> !fromRobot(l))
+  .map(q -> q.toAnonymousRequest())
+  .peek(System.out::println)
+  .collect(Collectors.toList());
+          </code>
+      </pre>
+      </div>
+      <p class="strong">Functional programming &rarr; <br>
+        immutability &rarr;<br>
+        <span class="color-indigo300">no more shared state</span>
+      </p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Reactive Streams</h2>
+      <p>
+        <span class="strong color-indigo300">asynchronous</span> events<br>
+        <span class="strong color-deeporange300">+</span><br>
+        <span class="strong color-indigo300">declarative</span> functions<br>
+        <span class="strong color-deeporange300">+</span><br>
+        non-blocking <span class="strong color-indigo300">back pressure</span>
+      </p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Back pressure ?</h2>
+      <p class="strong">Remember message queues?</p>
+      <!--Back pressure describes the build-up of data, when the incoming task rate is higher than the system’s -->
+      <!--ability to process them – resulting in a buffer of unhandled data.-->
+      <img style="width: 50%;background-color: white" src="../img/reactive/reactive-streams.001.png">
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Reactive Streams</h2>
+      <img style="width: 85%;background-color: white" src="../img/reactive/reactive-streams.002.png">
+      <p class="strong">Pull demand, Push data</p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Reactive Streams</h2>
+      <div class="code-wrapper smaller">
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+public interface Publisher&lt;T&gt; {
+  void subscribe(Subscriber&lt;? super &lt;T&gt; subscriber);
+}
+
+public interface Subscriber&lt;T&gt; {
+  void onSubscribe(Subscription subscription);
+  void onNext(T item);
+  void onError(Throwable throwable);
+  void onComplete();
+}
+
+public interface Subscription {
+  void request(long n);
+  void cancel();
+}
+          </code>
+      </pre>
+      </div>
+      <p class="strong">Included in Java 9<br>
+        <code>java.util.concurrent.Flow</code>
+      </p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Reactive Streams</h2>
+      <ul class="nodisc strong">
+        <li>RxJava</li>
+        <li>Spring Reactor</li>
+        <li>Vert.x</li>
+        <li>Akka Streams</li>
+        <li>...</li>
+      </ul>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>RxJava</h2>
+      <p class="strong">
+        Observables + Operators + Scheduling
+      </p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Observables</h2>
+      <div class="code-wrapper">
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+Observable.create(observer -> {
+  try {
+    observer.onNext(provider.getQuote());
+    observer.onComplete();
+  } catch (Exception e) {
+    observer.onError(e);
+  }
+});
+
+Observable.defer(() -> Observable.just(provider.getQuote());
+
+Observable.just(1,2,3,4);
+          </code>
+      </pre>
+      </div>
+      <p class="strong">Flow of Event / Data / Task</p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Operators</h2>
+      <div class="code-wrapper">
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+Observable.fromIterable(providers)
+  .map(p -> p.getQuote())
+  .filter(q -> !q.hasError())
+  .subscribe(System.out::println);
+          </code>
+      </pre>
+      </div>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Scheduling</h2>
+      <div class="code-wrapper">
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+Observable.fromIterable(providers)
+  .subscribeOn(Schedulers.computation())
+  .doOnNext(p -> logStart(p)) // computation
+  .observeOn(Schedulers.io())
+  .map(p -> p.getQuote()) // io
+  .observeOn(Schedulers.from(threadPool))
+  .filter(q -> !q.hasError()) // threadPool
+  .subscribe(System.out::println); // threadPool
+          </code>
+      </pre>
+      </div>
+      <p  class="strong"><code>subscribeOn</code>: on which thread events are <code>created</code>.</p>
+      <p class="strong"><code>observeOn</code>: on which thread events are observed.</p>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Orchestrator</h2>
+      <div class="code-wrapper smaller">
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+private Map doQuotation(ResultatTarifications resultat, Control control, List products) {
+    //...
+    final List runnables = new ArrayList<>();
+    try {
+        prepareRunnables(runnables, projet, resultat, products, control, ...);
+        long timeOut = control.getConnectionTimeout();
+        final long startTime = System.currentTimeMillis();
+        for (OrchestratorRunnable runnable : runnables) {
+            // .. mapping in, web service call, mapping out
+            executeRunnable(timeOut, startTime, runnable);
+        }
+        waitAll(startTime, getModule(), runnables, timeOut);
+        logTarificationTimer(runnables, startTime);
+        postTraitements(resultat);
+    } catch (Throwable t) {
+        LOG.error("Error occurs during tarifications " + projet.getOffreUid(), t);
+    } finally {
+        checkResultat(resultat);
+    }
+    final Map contexts = new HashMap<>();
+    for (TarificationRunnable runnable : runnables) {
+        contexts.put(runnable.getProvider(), runnable.getContext());
+    }
+    return Collections.unmodifiableMap(contexts);
+}
+          </code>
+      </pre>
+      </div>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Requirements</h2>
+      <ul class="white nodisc">
+        <li class="strong">Better resource management</li>
+        <li class="strong">Easier SLA enforcement</li>
+        <li class="strong">Cleaner code</li>
+      </ul>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Quotation Model</h2>
+      <div class="code-wrapper">
+         <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+Provider provider;
+
+QuoteRequest quoteRequest;
+
+QuoteResult result = provider.doReceiveQuote(quoteRequest);
+          </code>
+         </pre>
+      </div>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Orchestrator CompletableFuture</h2>
+      <div class="code-wrapper smaller">
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+private CompletableFuture&lt;QuoteResult&gt; quoteFromProvider(QuoteRequest q, Provider provider) {
+  return CompletableFuture.supplyAsync(() -> provider.doReceiveQuote(q), executorService)
+      .thenApply(provider::mapResult)
+      <span class="fragment">.completeOnTimeout(new QuoteResult(new TimeoutException("Timeout")),
+          getTimeout(), TimeUnit.MILLISECONDS)</span>
+      ;
+}
+          </code>
+      </pre>
+      </div>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Orchestrator CompletableFuture</h2>
+      <p>Scatter</p>
+      <div class="code-wrapper smaller">
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+QuoteRequest q = ..
+List&lt;CompletableFuture&lt;QuoteResult&gt;&gt; futures = providers.stream()
+                .map(provider -> quoteFromProvider(q, provider))
+                .collect(Collectors.toList());
+          </code>
+      </pre>
+      </div>
+      <p>Gather</p>
+      <div class="code-wrapper smaller">
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+CompletableFuture&lt;List&lt;QuoteResult&gt;&gt; resultList =
+    CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+        .thenApply(v -> futures.stream()
+            .map(CompletableFuture::join)
+            .collect(toList()));
+
+List&lt;QuoteResult&gt; rl = resultList.get();
+          </code>
+      </pre>
+      </div>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Orchestrator RxJava Observable</h2>
+      <div class="code-wrapper smaller">
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+private Observable&lt;QuoteResult&gt; quoteFromProvider(QuoteRequest q, Provider p) {
+  return Observable.just(q)
+          .map(p::mapRequest)
+          .map(p::doReceiveQuote)
+          .map(p::mapResult)
+          .timeout(getTimeout(), TimeUnit.MILLISECONDS,
+              Observable.just(new QuoteResult(new TimeoutException("Timeout"))))
+      .subscribeOn(Schedulers.from(executorService));
+}
+          </code>
+      </pre>
+      </div>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Orchestrator RxJava Observable</h2>
+      <p>Scatter</p>
+      <div class="code-wrapper smaller">
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+private Observable&lt;List&lt;QuoteResult&gt;&gt; quoteForAllProviders(QuoteRequest q) {
+  return Observable.fromIterable(providers)
+      .flatMap(p -> quoteFromProvider(p, q))
+      .toList()
+      .toObservable();
+}
+          </code>
+      </pre>
+      </div>
+      <p>Gather</p>
+      <div class="code-wrapper smaller">
+      <pre class="prettyprint" style="background: none">
+          <code class="code language-java" data-trim data-noescape>
+List&lt;QuoteResult&gt; quotes = quoteForAllProviders(new QuoteRequest()).blockingSingle();
+          </code>
+      </pre>
+      </div>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Orchestrator RxJava Processor</h2>
+      <div class="code-wrapper smaller">
+      <pre class="prettyprint" style="background-color: transparent">
+          <code class="code language-java" data-trim data-noescape>
+/* Prepare resources per WS Endpoint */
+ExecutorService executor = Executors.newFixedThreadPool(20);
+Scheduler scheduler = Schedulers.from(executor);
+
+PublishProcessor&lt;QuoteResult&gt; processor = PublishProcessor.create();
+ExecutorSubscriber&lt;QuoteResult&gt; subscriber = new ExecutorSubscriber<>(executor);
+processor
+        <span class="fragment" data-fragment-index="6">.onBackpressureDrop(quote -> warn("Drop " + quote.getOfferId()))
+        .observeOn(Schedulers.computation(), false, 5)</span>
+        <span class="fragment" data-fragment-index="5">.flatMap(q -> </span><span class="fragment" data-fragment-index="1">Flowable.fromCallable(() -> receiveQuote(q))</span>
+                        <span class="fragment" data-fragment-index="2">.subscribeOn(scheduler)</span>
+                        <span class="fragment" data-fragment-index="3">.timeout(1000, MILLISECONDS, Schedulers.computation())</span>
+                        <span class="fragment" data-fragment-index="4">.onErrorReturn(throwable -> handleError(q, throwable))</span>
+            <span class="fragment" data-fragment-index="5">, false, 10, 1)</span>
+        .subscribeWith(subscriber);
+<span class="fragment" data-fragment-index="7">/* Push requests to processor */
+processor.onNext(new QuoteRequest());
+subscriber.requestIfNeeded();
+waitForCompletion();</span>
+          </code>
+      </pre>
+      </div>
+    </section>
+
+<!--
+    <section class="center" data-background="#333">
+      <h2>Orchestrator RxJava Processor</h2>
+      <div class="code-wrapper smaller">
+      <pre class="prettyprint" style="background-color: transparent">
+          <code class="code language-java" data-trim data-noescape>
+ExecutorService executor = Executors.newFixedThreadPool(20);
+Scheduler scheduler = Schedulers.from(executor);
+
+PublishProcessor&lt;QuoteResult&gt; processor = PublishProcessor.create();
+ExecutorSubscriber&lt;QuoteResult&gt; subscriber = new ExecutorSubscriber<>(executor);
+processor
+        .onBackpressureDrop(quote -> warn("Drop " + quote.getOfferId()))
+        .observeOn(Schedulers.computation(), false, 5)
+        .flatMap(q -> Flowable.fromCallable(() -> receiveQuote(q))
+                        .subscribeOn(scheduler)
+                        .timeout(1000, MILLISECONDS, Schedulers.computation())
+                        .onErrorReturn(throwable -> handleError(q, throwable))
+                , false, 20, 1)
+        .subscribeWith(subscriber);
+/*...*/
+processor.onNext(new QuoteRequest());
+subscriber.requestIfNeeded();
+waitForCompletion();
+          </code>
+      </pre>
+      </div>
+    </section>
+-->
+
+    <section class="center" data-background="#333">
+      <h2>Orchestrator RxJava Subscriber</h2>
+      <div class="code-wrapper smaller">
+      <pre class="prettyprint" style="background-color: transparent">
+          <code class="code language-java" data-trim data-noescape>
+class ExecutorSubscriber&lt;T&gt; implements Subscriber&lt;T&gt; {
+
+  Subscription s;
+  AtomicInteger c = new AtomicInteger(0);
+
+  @Override
+  public void onNext(T o) {
+      c.decrementAndGet();
+  }
+
+  public void requestIfNeeded() {
+      if (c.get() < 10)
+          c.incrementAndGet();
+          s.request(1);
+      }
+  }
+          </code>
+      </pre>
+      </div>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>How to manage endpoints?</h2>
+      <ul class="white strong nodisc">
+        <li>Back pressure per endpoint</li>
+        <li>Scalable thread pools</li>
+        <li>Common thread pool with scaling</li>
+        <li>Prioritizing different types of calls</li>
+      </ul>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Migrating to Reactive Streams</h2>
+      <ul class="white strong nodisc">
+        <li>Encapsulate your good old runnables</li>
+        <li>Handle errors & timeouts</li>
+        <li>Rewrite runnables in Stream & Return Observables</li>
+      </ul>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Best practices & Pitfalls RxJava</h2>
+      <ul class="white strong nodisc">
+        <li><code>subsribeOn</code> and <code>observeOn</code></li>
+        <li>Back pressure</li>
+        <li>Debugging</li>
+        <li>Using with legacy code</li>
+        <li><code>Observable.create()</code></li>
+      </ul>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Completable<span class="color-indigo300">Future</span>
+      </h2>
+      <ul class="white strong nodisc">
+        <li>Managing SLAs : Circuit breaker, Hystrix ?</li>
+        <li>Benchmarking Behavior</li>
+      </ul>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Testing & Benchmarking</h2>
+      <ul class="white strong nodisc">
+        <li>RxJava <code>TestSubscriber</code></li>
+        <li><span class="color-indigo300">Reactivity Test Scenarios</span>: Long-term stress, short bursts</li>
+        <li><span class="color-indigo300">Execution performance</span>: <a href="https://akarnokd.blogspot.fr/">https://akarnokd.blogspot.fr/</a></li>
+      </ul>
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Reactive Book</h2>
+      <img style="width: 40%;background-color: white" src="../img/reactive/lrg.jpg">
+    </section>
+
+    <section class="center" data-background="#333">
+      <h2>Furets Book</h2>
+      <img style="width: 40%;background-color: white" src="../img/oreilly_furets_cover.jpg">
+    </section>
+
+    <section class="center" data-state="background-furets">
+      <h2>Slides & Examples</h2>
+      <a class="github" href="https://github.com/lesfurets/lf-reactive" target="_blank">https://github.com/lesfurets/lf-reactive</a>
+      <br><br>
+      <h2>Open Source @ Lesfurets</h2>
+      <a class="github" href="https://github.com/lesfurets" target="_blank">https://github.com/lesfurets</a>
+    </section>
+
+  </div>
+</div>
+<script src="../bower_components/reveal.js/lib/js/head.min.js"></script>
+<script src="../bower_components/reveal.js/js/reveal.js"></script>
+<script>
+    // Full list of configuration options available here:
+    // https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        embedded: true,
+
+        // Hack my remote because it send 5 events
+        keyboard: {
+            // Tab : nop
+            9: null,
+            // Page down : previous slide
+            33: function () {
+                if (!window.animate) {
+                    window.animate = true;
+                    Reveal.left();
+                    setTimeout(function () {
+                        window.animate = false;
+                    }, 1000);
+                }
+            },
+            // Page up : next slide
+            34: function () {
+                if (!window.animate) {
+                    window.animate = true;
+                    Reveal.right();
+                    setTimeout(function () {
+                        window.animate = false;
+                    }, 1000);
+                }
+            }
+        },
+
+        //theme: 'lesfurets', // available themes are in /css/theme
+        transition: Reveal.getQueryHash().transition || 'linear', // default/cube/page/concave/zoom/linear/fade/none
+
+        // Parallax scrolling
+        // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+        // parallaxBackgroundSize: '2100px 900px',
+
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+            {
+                src: '../bower_components/reveal.js/lib/js/classList.js', condition: function () {
+                return !document.body.classList;
+            }
+            },
+            {
+                src: '../bower_components/reveal.js/plugin/markdown/marked.js', condition: function () {
+                return !!document.querySelector('[data-markdown]');
+            }
+            },
+            {
+                src: '../bower_components/reveal.js/plugin/markdown/markdown.js', condition: function () {
+                return !!document.querySelector('[data-markdown]');
+            }
+            },
+            {
+                src: '../bower_components/reveal.js/plugin/highlight/highlight.js', async: true, callback: function () {
+                hljs.initHighlightingOnLoad();
+            }
+            },
+            {
+                src: '../bower_components/reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function () {
+                return !!document.body.classList;
+            }
+            },
+            {
+                src: '../bower_components/reveal.js/plugin/notes/notes.js', async: true, condition: function () {
+                return !!document.body.classList;
+            }
+            },
+            {
+                src: '../js/prettify.js', async: true, callback: function () {
+                PR.prettyPrint();
+            }
+            }
+        ]
+    });
+</script>
+<script src="../js/lesfurets-theme.js" async></script>
+</body>
+</html>
