@@ -340,13 +340,9 @@ httpAsyncGet("http://www.lesfurets.com", ar -> {
       <div class="code-wrapper">
       <pre class="prettyprint" style="background: none">
           <code class="code language-java" data-trim data-noescape>
-CompletableFuture.supplyAsync(() -> {
-  try {
-    return httpBlockingGet("http://www.lesfurets.com");
-  } catch (Exception e) {
-    return "Error :"+e.getMessage();
-  }
-}, executor)
+CompletableFuture.supplyAsync(() ->
+    httpBlockingGet("http://www.lesfurets.com"), executor)
+    .exceptionally(t -> "Error :" + t.getMessage())
     .thenApply(c -> searchTitle(c))
     .thenAccept(s -> {
       // use title
@@ -354,7 +350,6 @@ CompletableFuture.supplyAsync(() -> {
           </code>
       </pre>
       </div>
-      <p class="strong color-deeporange300">Error handling</p>
     </section>
 
     <section class="center" data-background="#333">
